@@ -68,9 +68,9 @@ struct LingoKeyboardView: View {
                 onBackspace: { lingoState.handleBackspace() },
                 onSpace: { lingoState.handleSpace() },
                 onReturn: { lingoState.handleReturn() },
-                onToggleNumberKeyboard: { lingoState.toggleNumberKeyboard() },
                 onSwitchToRomaji: { lingoState.switchToRomajiInput() },
-                onToggleEmojiPicker: { lingoState.toggleEmojiPicker() }
+                onToggleEmojiPicker: { lingoState.toggleEmojiPicker() },
+                isComposing: !lingoState.hiraganaBuffer.isEmpty
             )
         } else {
             QwertyKeyboardView(
@@ -107,8 +107,8 @@ struct QwertyKeyboardView: View {
 
     private let ksp: CGFloat = 6
     private let rsp: CGFloat = 11
-    private let hPad: CGFloat = 3
-    private let keyH: CGFloat = 42
+    private let hPad: CGFloat = 5
+    private let keyH: CGFloat = 43
 
     var body: some View {
         GeometryReader { geo in
@@ -155,7 +155,7 @@ struct QwertyKeyboardView: View {
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
                 .background(KeyboardColors.specialKey)
-                .cornerRadius(5)
+                .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
         .buttonStyle(.plain)
@@ -168,7 +168,7 @@ struct QwertyKeyboardView: View {
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
                 .background(KeyboardColors.specialKey)
-                .cornerRadius(5)
+                .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
     }
@@ -187,7 +187,7 @@ struct QwertyKeyboardView: View {
                     .foregroundStyle(.primary)
                     .frame(width: keyWidth, height: keyH)
                     .background(KeyboardColors.specialKey)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -199,7 +199,7 @@ struct QwertyKeyboardView: View {
                     .font(.system(size: 18))
                     .frame(width: keyWidth, height: keyH)
                     .background(KeyboardColors.specialKey)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -210,7 +210,7 @@ struct QwertyKeyboardView: View {
                 Text("")
                     .frame(width: spaceW, height: keyH)
                     .background(KeyboardColors.key)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -221,7 +221,7 @@ struct QwertyKeyboardView: View {
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
                     .background(KeyboardColors.confirm)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -278,9 +278,9 @@ struct KeyButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 22))
-            .frame(maxWidth: .infinity, minHeight: 42)
+            .frame(maxWidth: .infinity, minHeight: 43)
             .background(configuration.isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
-            .cornerRadius(5)
+            .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
     }
 }
@@ -290,9 +290,9 @@ struct SpecialKeyStyle: ButtonStyle {
         configuration.label
             .font(.system(size: 15))
             .foregroundStyle(.primary)
-            .frame(minHeight: 42)
+            .frame(minHeight: 43)
             .background(configuration.isPressed ? KeyboardColors.specialKeyPressed : KeyboardColors.specialKey)
-            .cornerRadius(5)
+            .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
     }
 }

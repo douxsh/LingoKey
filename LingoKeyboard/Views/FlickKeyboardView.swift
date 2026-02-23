@@ -3,11 +3,11 @@ import SwiftUI
 /// Japanese flick keyboard matching Apple's native layout:
 ///
 /// ```
-/// [数字]   [あ]    [か]    [さ]    [⌫]
-/// [ABC]    [た]    [な]    [は]    [空白]
-/// [あいう] [ま]    [や]    [ら]    ┌──────┐
-/// [^_^]    [小゛゜] [わ]   [、]    │ 確定  │
-///                                  └──────┘
+/// [→]   [あ]    [か]    [さ]    [⌫]
+/// [↩]   [た]    [な]    [は]    [空白]
+/// [ABC] [ま]    [や]    [ら]    ┌──────┐
+/// [😊]  [^^/小゛゜] [わ] [、。?!] │  →   │
+///                                └──────┘
 /// ```
 struct FlickKeyboardView: View {
     let onKana: (String) -> Void
@@ -15,9 +15,9 @@ struct FlickKeyboardView: View {
     let onBackspace: () -> Void
     let onSpace: () -> Void
     let onReturn: () -> Void
-    let onToggleNumberKeyboard: () -> Void
     let onSwitchToRomaji: () -> Void
     var onToggleEmojiPicker: (() -> Void)? = nil
+    var isComposing: Bool = false
 
     private let rowHeight: CGFloat = 46
     private let keySpacing: CGFloat = 6
@@ -27,7 +27,7 @@ struct FlickKeyboardView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let totalWidth = geo.size.width - 8 // subtract horizontal padding
+            let totalWidth = geo.size.width - 10 // subtract horizontal padding
             let cols: CGFloat = 5
             let calcWidth = (totalWidth - keySpacing * (cols - 1)) / cols
 
@@ -39,7 +39,7 @@ struct FlickKeyboardView: View {
                 // Rows 2-3: left 4 columns + tall 確定 button on right
                 bottomRows
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 5)
             .padding(.vertical, 4)
             .onAppear { columnWidth = calcWidth }
             .onChange(of: geo.size.width) { _, _ in columnWidth = calcWidth }
@@ -51,7 +51,7 @@ struct FlickKeyboardView: View {
 
     private var row0: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(label: "数字") { onToggleNumberKeyboard() }
+            flickSideButton(systemImage: "arrow.right") { }
             flickCells(for: FlickKeyMap.kanaGrid[0])
             flickRepeatingBackspace
         }
@@ -59,7 +59,7 @@ struct FlickKeyboardView: View {
 
     private var row1: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(label: "ABC") { onSwitchToRomaji() }
+            flickSideButton(systemImage: "arrow.counterclockwise") { }
             flickCells(for: FlickKeyMap.kanaGrid[1])
             flickSideButton(label: "空白") { onSpace() }
         }
@@ -70,20 +70,24 @@ struct FlickKeyboardView: View {
         HStack(spacing: keySpacing) {
             // Columns 1-4: two rows stacked
             VStack(spacing: keySpacing) {
-                // Row 2: あいう | ま や ら
+                // Row 2: ABC | ま や ら
                 HStack(spacing: keySpacing) {
-                    flickSideButton(label: "あいう", fontSize: 10, isActive: true) { }
+                    flickSideButton(label: "ABC") { onSwitchToRomaji() }
                     flickCells(for: FlickKeyMap.kanaGrid[2])
                 }
-                // Row 3: ^_^ | 小゛゜ わ 、
+                // Row 3: 😊 | ^^/小゛゜ わ 、。?!
                 HStack(spacing: keySpacing) {
-                    flickSideButton(label: "^_^") { onToggleEmojiPicker?() }
-                    // 小゛゜ key
+                    flickSideButton(systemImage: "face.smiling") { onToggleEmojiPicker?() }
+                    // Context-dependent: kaomoji when not composing, modifier toggle when composing
                     Button {
-                        onModifierToggle()
+                        if isComposing {
+                            onModifierToggle()
+                        } else {
+                            onToggleEmojiPicker?()
+                        }
                     } label: {
-                        Text("小゛゜")
-                            .font(.system(size: 14))
+                        Text(isComposing ? "小゛゜" : "^^")
+                            .font(.system(size: isComposing ? 14 : 18))
                             .frame(maxWidth: .infinity, minHeight: rowHeight)
                     }
                     .buttonStyle(FlickSpecialKeyStyle())
@@ -94,15 +98,19 @@ struct FlickKeyboardView: View {
                 }
             }
 
-            // Column 5: tall 確定/改行 button spanning 2 rows, same width as one column
+            // Column 5: tall confirm button spanning 2 rows, same width as one column
             Button {
                 onReturn()
             } label: {
-                Text("確定")
-                    .font(.system(size: 13))
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
                     .frame(width: columnWidth, height: rowHeight * 2 + keySpacing)
+                    .background(KeyboardColors.confirm)
+                    .cornerRadius(8)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(FlickSpecialKeyStyle())
+            .buttonStyle(.plain)
         }
     }
 
@@ -114,8 +122,8 @@ struct FlickKeyboardView: View {
                 .font(.system(size: 18))
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: rowHeight)
-                .background(KeyboardColors.specialKey)
-                .cornerRadius(5)
+                .background(KeyboardColors.key)
+                .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
     }
@@ -132,7 +140,6 @@ struct FlickKeyboardView: View {
         label: String? = nil,
         systemImage: String? = nil,
         fontSize: CGFloat = 13,
-        isActive: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -147,7 +154,7 @@ struct FlickKeyboardView: View {
             }
             .frame(maxWidth: .infinity, minHeight: rowHeight)
         }
-        .buttonStyle(FlickSpecialKeyStyle(isActive: isActive))
+        .buttonStyle(FlickSpecialKeyStyle())
     }
 }
 
@@ -168,7 +175,7 @@ private struct FlickKeyCell: View {
             .font(.system(size: 22))
             .frame(maxWidth: .infinity, minHeight: height)
             .background(isDragging ? KeyboardColors.keyPressed : KeyboardColors.key)
-            .cornerRadius(5)
+            .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             .overlay(alignment: .top) {
                 if isDragging {
@@ -258,11 +265,11 @@ private struct PunctuationFlickKeyCell: View {
     private static let cycleTimeout: TimeInterval = 1.0
 
     var body: some View {
-        Text(flickKey.center)
-            .font(.system(size: 22))
+        Text("、。?!")
+            .font(.system(size: 16))
             .frame(maxWidth: .infinity, minHeight: height)
             .background(isDragging ? KeyboardColors.keyPressed : KeyboardColors.key)
-            .cornerRadius(5)
+            .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             .overlay(alignment: .top) {
                 if isDragging {
@@ -367,17 +374,11 @@ private struct PunctuationFlickKeyCell: View {
 // MARK: - Flick Key Style
 
 struct FlickSpecialKeyStyle: ButtonStyle {
-    var isActive: Bool = false
-
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundStyle(.primary)
-            .background(
-                configuration.isPressed
-                    ? KeyboardColors.specialKeyPressed
-                    : isActive ? KeyboardColors.keyPressed : KeyboardColors.specialKey
-            )
-            .cornerRadius(5)
+            .background(configuration.isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
+            .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
     }
 }

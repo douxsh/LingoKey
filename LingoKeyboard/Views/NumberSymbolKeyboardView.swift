@@ -22,8 +22,8 @@ struct NumberSymbolKeyboardView: View {
 
     private let ksp: CGFloat = 6
     private let rsp: CGFloat = 11
-    private let hPad: CGFloat = 3
-    private let keyH: CGFloat = 42
+    private let hPad: CGFloat = 5
+    private let keyH: CGFloat = 43
 
     var body: some View {
         GeometryReader { geo in
@@ -77,7 +77,7 @@ struct NumberSymbolKeyboardView: View {
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
                 .background(KeyboardColors.specialKey)
-                .cornerRadius(5)
+                .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
         .buttonStyle(.plain)
@@ -90,7 +90,7 @@ struct NumberSymbolKeyboardView: View {
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
                 .background(KeyboardColors.specialKey)
-                .cornerRadius(5)
+                .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
     }
@@ -108,7 +108,7 @@ struct NumberSymbolKeyboardView: View {
                     .foregroundStyle(.primary)
                     .frame(width: keyWidth, height: keyH)
                     .background(KeyboardColors.specialKey)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -120,7 +120,7 @@ struct NumberSymbolKeyboardView: View {
                     .font(.system(size: 18))
                     .frame(width: keyWidth, height: keyH)
                     .background(KeyboardColors.specialKey)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -131,7 +131,7 @@ struct NumberSymbolKeyboardView: View {
                 Text("")
                     .frame(width: spaceW, height: keyH)
                     .background(KeyboardColors.key)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
@@ -142,7 +142,7 @@ struct NumberSymbolKeyboardView: View {
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
                     .background(KeyboardColors.confirm)
-                    .cornerRadius(5)
+                    .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
             .buttonStyle(.plain)
