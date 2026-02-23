@@ -47,7 +47,7 @@ final class LingoKeyboardState {
 
     @ObservationIgnored let hangulComposer = HangulComposer()
     @ObservationIgnored let romajiConverter = RomajiToHiraganaConverter()
-    @ObservationIgnored let apiService = ClaudeAPIService()
+    @ObservationIgnored let apiService = LLMAPIService()
     @ObservationIgnored let localConverter = LocalKanaKanjiConverter()
 
     init(controller: KeyboardViewController?) {
@@ -171,46 +171,43 @@ final class LingoKeyboardState {
         suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
     }
 
-    /// Cycles through dakuten → handakuten → small kana → original
+    /// Cycles: original → small kana → dakuten → handakuten → original
+    /// If no small kana: original → dakuten → handakuten → original
     func handleModifierToggle() {
         guard !hiraganaBuffer.isEmpty else { return }
         let last = hiraganaBuffer.last!
-        let oldBuffer = hiraganaBuffer
 
-        // Currently dakuten → try handakuten, else revert to original
-        if let original = FlickKeyMap.dakutenReverse[last] {
-            if let handakuten = FlickKeyMap.handakutenForward[original] {
-                hiraganaBuffer.removeLast()
-                hiraganaBuffer.append(handakuten)
-            } else {
-                hiraganaBuffer.removeLast()
-                hiraganaBuffer.append(original)
-            }
-        }
-        // Currently handakuten → revert to original
-        else if let original = FlickKeyMap.handakutenReverse[last] {
-            hiraganaBuffer.removeLast()
-            hiraganaBuffer.append(original)
-        }
-        // Currently small kana → revert to original
-        else if let original = FlickKeyMap.smallKanaReverse[last] {
-            hiraganaBuffer.removeLast()
-            hiraganaBuffer.append(original)
-        }
-        // Try dakuten forward
-        else if let dakuten = FlickKeyMap.dakutenForward[last] {
-            hiraganaBuffer.removeLast()
-            hiraganaBuffer.append(dakuten)
-        }
-        // Try small kana forward
-        else if let small = FlickKeyMap.smallKanaForward[last] {
-            hiraganaBuffer.removeLast()
-            hiraganaBuffer.append(small)
+        // Find the original (base) character
+        let original: Character
+        if let o = FlickKeyMap.smallKanaReverse[last] {
+            original = o
+        } else if let o = FlickKeyMap.dakutenReverse[last] {
+            original = o
+        } else if let o = FlickKeyMap.handakutenReverse[last] {
+            original = o
+        } else {
+            original = last
         }
 
-        if hiraganaBuffer != oldBuffer {
-            suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
+        // Build cycle: original → small → dakuten → handakuten
+        var cycle: [Character] = [original]
+        if let small = FlickKeyMap.smallKanaForward[original] {
+            cycle.append(small)
         }
+        if let dakuten = FlickKeyMap.dakutenForward[original] {
+            cycle.append(dakuten)
+        }
+        if let handakuten = FlickKeyMap.handakutenForward[original] {
+            cycle.append(handakuten)
+        }
+
+        guard cycle.count > 1 else { return }
+        let currentIndex = cycle.firstIndex(of: last) ?? 0
+        let nextIndex = (currentIndex + 1) % cycle.count
+
+        hiraganaBuffer.removeLast()
+        hiraganaBuffer.append(cycle[nextIndex])
+        suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
     }
 
     // MARK: - Backspace

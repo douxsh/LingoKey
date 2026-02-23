@@ -56,7 +56,7 @@ enum FlickKeyMap {
 
     // Bottom-row center keys
     static let kanaWa = FlickKey(center: "わ", left: "を", up: "ん", right: "ー", down: "〜")
-    static let punctuation = FlickKey(center: "、", left: "！", up: "。", right: "？", down: "・")
+    static let punctuation = FlickKey(center: "、", left: "。", up: "？", right: "！", down: "")
 
     // MARK: - Dakuten (濁点) Forward Map
 

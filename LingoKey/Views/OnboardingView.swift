@@ -82,9 +82,9 @@ struct OnboardingView: View {
                 .font(.title2.bold())
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Claude API Key")
+                Text("OpenAI API Key")
                     .font(.headline)
-                SecureField("sk-ant-...", text: $apiKeyInput)
+                SecureField("sk-...", text: $apiKeyInput)
                     .textFieldStyle(.roundedBorder)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)

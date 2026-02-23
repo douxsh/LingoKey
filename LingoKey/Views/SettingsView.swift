@@ -8,7 +8,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("API Key") {
-                SecureField("sk-ant-...", text: $apiKeyInput)
+                SecureField("sk-...", text: $apiKeyInput)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
             }

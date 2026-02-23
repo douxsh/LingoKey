@@ -1,10 +1,10 @@
 import Foundation
 
-final class ClaudeAPIService {
+final class LLMAPIService {
     var apiKey: String = ""
 
-    private let endpoint = URL(string: "https://api.anthropic.com/v1/messages")!
-    private let model = "claude-sonnet-4-5"
+    private let endpoint = URL(string: "https://api.openai.com/v1/chat/completions")!
+    private let model = "gpt-4.1-nano"
     private let maxTokens = 256
     private let session: URLSession
 
@@ -18,8 +18,7 @@ final class ClaudeAPIService {
 
     func correct(text: String, mode: KeyboardMode) async -> [Suggestion] {
         let systemPrompt = systemPrompt(for: mode)
-        let userMessage = text
-        return await callAPI(system: systemPrompt, userMessage: userMessage, originalText: text)
+        return await callAPI(system: systemPrompt, userMessage: text, originalText: text)
     }
 
     func translate(text: String, mode: KeyboardMode) async -> [Suggestion] {
@@ -57,17 +56,18 @@ final class ClaudeAPIService {
     private func callAPI(system: String, userMessage: String, originalText: String) async -> [Suggestion] {
         guard !apiKey.isEmpty else { return [] }
 
-        let request = ClaudeRequest(
+        let request = OpenAIRequest(
             model: model,
-            max_tokens: maxTokens,
-            system: system,
-            messages: [ClaudeMessage(role: "user", content: userMessage)]
+            messages: [
+                OpenAIMessage(role: "system", content: system),
+                OpenAIMessage(role: "user", content: userMessage)
+            ],
+            max_tokens: maxTokens
         )
 
         var urlRequest = URLRequest(url: endpoint)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        urlRequest.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
@@ -79,8 +79,8 @@ final class ClaudeAPIService {
                 return []
             }
 
-            let claudeResponse = try JSONDecoder().decode(ClaudeResponse.self, from: data)
-            return parseSuggestions(from: claudeResponse, originalText: originalText)
+            let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+            return parseSuggestions(from: openAIResponse, originalText: originalText)
         } catch {
             return []
         }
@@ -89,17 +89,18 @@ final class ClaudeAPIService {
     private func callConvertAndTranslateAPI(system: String, hiragana: String) async -> [Suggestion] {
         guard !apiKey.isEmpty else { return [] }
 
-        let request = ClaudeRequest(
+        let request = OpenAIRequest(
             model: model,
-            max_tokens: maxTokens,
-            system: system,
-            messages: [ClaudeMessage(role: "user", content: hiragana)]
+            messages: [
+                OpenAIMessage(role: "system", content: system),
+                OpenAIMessage(role: "user", content: hiragana)
+            ],
+            max_tokens: maxTokens
         )
 
         var urlRequest = URLRequest(url: endpoint)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        urlRequest.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
@@ -111,22 +112,20 @@ final class ClaudeAPIService {
                 return []
             }
 
-            let claudeResponse = try JSONDecoder().decode(ClaudeResponse.self, from: data)
-            return parseConvertAndTranslate(from: claudeResponse, originalText: hiragana)
+            let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+            return parseConvertAndTranslate(from: openAIResponse, originalText: hiragana)
         } catch {
             return []
         }
     }
 
-    private func parseConvertAndTranslate(from response: ClaudeResponse, originalText: String) -> [Suggestion] {
-        guard let textBlock = response.content.first(where: { $0.type == "text" }),
-              let text = textBlock.text else {
+    private func parseConvertAndTranslate(from response: OpenAIResponse, originalText: String) -> [Suggestion] {
+        guard let text = response.choices.first?.message.content else {
             return []
         }
 
         let cleaned = extractJSON(from: text)
 
-        // Try to parse as {"conversions":[...], "translations":[...]}
         if let data = cleaned.data(using: .utf8),
            let json = try? JSONDecoder().decode(ConvertAndTranslateResponse.self, from: data) {
             var results: [Suggestion] = []
@@ -139,7 +138,6 @@ final class ClaudeAPIService {
             return results
         }
 
-        // Fallback: treat as single translation
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
         return [Suggestion(text: trimmed, originalText: originalText, kind: .translation)]
@@ -178,37 +176,30 @@ final class ClaudeAPIService {
         """
     }
 
-    private func parseSuggestions(from response: ClaudeResponse, originalText: String) -> [Suggestion] {
-        guard let textBlock = response.content.first(where: { $0.type == "text" }),
-              let text = textBlock.text else {
+    private func parseSuggestions(from response: OpenAIResponse, originalText: String) -> [Suggestion] {
+        guard let text = response.choices.first?.message.content else {
             return []
         }
 
         let cleaned = extractJSON(from: text)
 
-        // Try to parse as JSON array
         if let data = cleaned.data(using: .utf8),
            let array = try? JSONDecoder().decode([String].self, from: data) {
             return array.map { Suggestion(text: $0, originalText: originalText) }
         }
 
-        // Fallback: treat the whole response as a single suggestion
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
         return [Suggestion(text: trimmed, originalText: originalText)]
     }
 
-    /// Strips markdown code fences and extracts the JSON content from Claude's response.
     private func extractJSON(from text: String) -> String {
         var s = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Strip ```json ... ``` or ``` ... ```
         if s.hasPrefix("```") {
-            // Remove opening fence (```json or ```)
             if let firstNewline = s.firstIndex(of: "\n") {
                 s = String(s[s.index(after: firstNewline)...])
             }
-            // Remove closing fence
             if s.hasSuffix("```") {
                 s = String(s.dropLast(3))
             }
