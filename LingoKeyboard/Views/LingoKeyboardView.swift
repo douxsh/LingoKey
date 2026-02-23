@@ -105,23 +105,35 @@ struct QwertyKeyboardView: View {
     private let row2 = ["a","s","d","f","g","h","j","k","l"]
     private let row3 = ["z","x","c","v","b","n","m"]
 
+    private let ksp: CGFloat = 6
+    private let rsp: CGFloat = 11
+    private let hPad: CGFloat = 3
+    private let keyH: CGFloat = 42
+
     var body: some View {
-        VStack(spacing: 8) {
-            keyRow(row1)
-            keyRow(row2)
-            HStack(spacing: 4) {
-                shiftButton
-                keyRow(row3, spacing: 4)
-                backspaceButton
+        GeometryReader { geo in
+            let aw = geo.size.width - hPad * 2
+            let kw = (aw - ksp * 9) / 10
+            let sideW = (aw - kw * 7 - ksp * 8) / 2
+
+            VStack(spacing: rsp) {
+                letterRow(row1, keyWidth: kw)
+                letterRow(row2, keyWidth: kw)
+                HStack(spacing: ksp) {
+                    shiftButton(width: sideW)
+                    letterRow(row3, keyWidth: kw)
+                    backspaceBtn(width: sideW)
+                }
+                bottomRow(keyWidth: kw, sideWidth: sideW, availableWidth: aw)
             }
-            bottomRow
+            .padding(.horizontal, hPad)
+            .padding(.vertical, 4)
         }
-        .padding(.horizontal, 3)
-        .padding(.vertical, 6)
+        .frame(height: keyH * 4 + rsp * 3 + 8)
     }
 
-    private func keyRow(_ keys: [String], spacing: CGFloat = 4) -> some View {
-        HStack(spacing: spacing) {
+    private func letterRow(_ keys: [String], keyWidth: CGFloat) -> some View {
+        HStack(spacing: ksp) {
             ForEach(keys, id: \.self) { key in
                 let display = isShifted ? key.uppercased() : key
                 Button(display) {
@@ -129,96 +141,91 @@ struct QwertyKeyboardView: View {
                     if isShifted { isShifted = false }
                 }
                 .buttonStyle(KeyButtonStyle())
+                .frame(width: keyWidth)
             }
         }
     }
 
-    private var shiftButton: some View {
+    private func shiftButton(width: CGFloat) -> some View {
         Button {
             isShifted.toggle()
         } label: {
             Image(systemName: isShifted ? "shift.fill" : "shift")
-                .frame(width: 36, height: 42)
-        }
-        .buttonStyle(SpecialKeyStyle())
-    }
-
-    private var backspaceButton: some View {
-        RepeatingButton(action: onBackspace) {
-            Image(systemName: "delete.left")
-                .font(.system(size: 15))
+                .font(.system(size: 16))
                 .foregroundStyle(.primary)
-                .frame(width: 36, height: 42)
-                .background(KeyboardColors.specialKey)
-                .cornerRadius(5)
-                .shadow(color: .black.opacity(0.15), radius: 0.5, y: 1)
-        }
-    }
-
-    private var bottomRow: some View {
-        GeometryReader { geo in
-            let totalWidth = geo.size.width
-            let sp: CGFloat = 4
-            let bsW: CGFloat = 36
-            let kw = (totalWidth - bsW * 2 - sp * 8) / 7
-            let confirmW = kw + sp + bsW   // m + backspace
-            let spaceW = totalWidth - kw * 2 - confirmW - sp * 3
-
-            HStack(spacing: sp) {
-                // 123 / かな — z width
-                bottomSpecialKey(
-                    label: showKanaSwitch ? "かな" : "123",
-                    width: kw
-                ) {
-                    if showKanaSwitch { onSwitchToKana?() }
-                    else { onToggleNumberKeyboard() }
-                }
-
-                // 😊 — x width
-                Button {
-                    onToggleEmojiPicker?()
-                } label: {
-                    Image(systemName: "face.smiling")
-                        .font(.system(size: 18))
-                        .frame(width: kw, height: 42)
-                        .background(KeyboardColors.specialKey)
-                        .cornerRadius(5)
-                        .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
-                }
-                .buttonStyle(.plain)
-
-                // space — x〜n
-                Button {
-                    onSpace()
-                } label: {
-                    Text("space")
-                        .font(.system(size: 15))
-                        .frame(width: spaceW, height: 42)
-                        .background(KeyboardColors.key)
-                        .cornerRadius(5)
-                        .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
-                }
-                .buttonStyle(.plain)
-
-                // 確定 — m + backspace
-                bottomSpecialKey(label: "確定", width: confirmW) {
-                    onReturn()
-                }
-            }
-        }
-        .frame(height: 42)
-    }
-
-    private func bottomSpecialKey(label: String, width: CGFloat, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 15))
-                .frame(width: width, height: 42)
+                .frame(width: width, height: keyH)
                 .background(KeyboardColors.specialKey)
                 .cornerRadius(5)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
         .buttonStyle(.plain)
+    }
+
+    private func backspaceBtn(width: CGFloat) -> some View {
+        RepeatingButton(action: onBackspace) {
+            Image(systemName: "delete.left")
+                .font(.system(size: 16))
+                .foregroundStyle(.primary)
+                .frame(width: width, height: keyH)
+                .background(KeyboardColors.specialKey)
+                .cornerRadius(5)
+                .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+        }
+    }
+
+    private func bottomRow(keyWidth: CGFloat, sideWidth: CGFloat, availableWidth: CGFloat) -> some View {
+        let confirmW = keyWidth + ksp + sideWidth
+        let spaceW = availableWidth - keyWidth * 2 - confirmW - ksp * 3
+
+        return HStack(spacing: ksp) {
+            Button(action: {
+                if showKanaSwitch { onSwitchToKana?() }
+                else { onToggleNumberKeyboard() }
+            }) {
+                Text(showKanaSwitch ? "かな" : "123")
+                    .font(.system(size: 15))
+                    .foregroundStyle(.primary)
+                    .frame(width: keyWidth, height: keyH)
+                    .background(KeyboardColors.specialKey)
+                    .cornerRadius(5)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                onToggleEmojiPicker?()
+            } label: {
+                Image(systemName: "face.smiling")
+                    .font(.system(size: 18))
+                    .frame(width: keyWidth, height: keyH)
+                    .background(KeyboardColors.specialKey)
+                    .cornerRadius(5)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                onSpace()
+            } label: {
+                Text("")
+                    .frame(width: spaceW, height: keyH)
+                    .background(KeyboardColors.key)
+                    .cornerRadius(5)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            }
+            .buttonStyle(.plain)
+
+            Button(action: { onReturn() }) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: confirmW, height: keyH)
+                    .background(Color.accentColor)
+                    .cornerRadius(5)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 
