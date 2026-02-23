@@ -19,7 +19,9 @@ struct LingoKeyboardView: View {
                 (!lingoState.confirmedText.isEmpty || !lingoState.hiraganaBuffer.isEmpty) {
                 HiraganaPreviewView(
                     confirmedText: lingoState.confirmedText,
-                    composingText: lingoState.hiraganaBuffer
+                    composingText: lingoState.hiraganaBuffer,
+                    cursorPosition: lingoState.bufferCursorPosition,
+                    isTrackpadActive: lingoState.isTrackpadActive
                 )
             }
 
@@ -73,7 +75,12 @@ struct LingoKeyboardView: View {
                 onAdvanceCursor: { lingoState.handleAdvanceCursor() },
                 onUndoKana: { lingoState.handleUndoKana() },
                 onToggleEmojiPicker: { lingoState.toggleEmojiPicker() },
-                isComposing: !lingoState.hiraganaBuffer.isEmpty
+                isComposing: !lingoState.hiraganaBuffer.isEmpty,
+                onCursorMove: { lingoState.moveBufferCursor(direction: $0) },
+                onTrackpadActivated: { lingoState.activateTrackpad() },
+                onTrackpadDeactivated: { lingoState.deactivateTrackpad() },
+                isTrackpadActive: lingoState.isTrackpadActive,
+                hasBufferContent: !lingoState.confirmedText.isEmpty || !lingoState.hiraganaBuffer.isEmpty
             )
         } else {
             QwertyKeyboardView(

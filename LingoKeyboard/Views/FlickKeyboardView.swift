@@ -21,6 +21,11 @@ struct FlickKeyboardView: View {
     let onUndoKana: () -> Void
     var onToggleEmojiPicker: (() -> Void)? = nil
     var isComposing: Bool = false
+    var onCursorMove: ((LingoKeyboardState.CursorDirection) -> Void)? = nil
+    var onTrackpadActivated: (() -> Void)? = nil
+    var onTrackpadDeactivated: (() -> Void)? = nil
+    var isTrackpadActive: Bool = false
+    var hasBufferContent: Bool = false
 
     private let rowHeight: CGFloat = 46
     private let keySpacing: CGFloat = 6
@@ -64,7 +69,21 @@ struct FlickKeyboardView: View {
         HStack(spacing: keySpacing) {
             flickSideButton(systemImage: "arrow.counterclockwise") { onUndoKana() }
             flickCells(for: FlickKeyMap.kanaGrid[1])
-            flickSideButton(label: "空白") { onSpace() }
+            TrackpadSpaceBar(
+                onSpace: onSpace,
+                onCursorMove: { dir in onCursorMove?(dir) },
+                onTrackpadActivated: { onTrackpadActivated?() },
+                onTrackpadDeactivated: { onTrackpadDeactivated?() },
+                hasBufferContent: hasBufferContent,
+                isTrackpadActive: isTrackpadActive
+            ) {
+                Text(isTrackpadActive ? "◀▶" : "空白")
+                    .font(.system(size: 13))
+                    .frame(maxWidth: .infinity, minHeight: rowHeight)
+                    .background(isTrackpadActive ? KeyboardColors.keyPressed : KeyboardColors.key)
+                    .cornerRadius(8)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            }
         }
     }
 

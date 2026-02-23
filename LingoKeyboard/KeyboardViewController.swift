@@ -36,6 +36,13 @@ final class LingoKeyboardState {
     var showEmojiPicker: Bool = false
     var useRomajiInput: Bool = false
 
+    // MARK: - Trackpad Cursor
+    /// Cursor position within `confirmedText + hiraganaBuffer`. nil = end (legacy behavior).
+    var bufferCursorPosition: Int? = nil
+    var isTrackpadActive: Bool = false
+
+    enum CursorDirection { case left, right }
+
     private weak var controller: KeyboardViewController?
     @ObservationIgnored private var _suggestionManager: SuggestionManager?
     private var suggestionManager: SuggestionManager {
@@ -78,6 +85,8 @@ final class LingoKeyboardState {
         showNumberKeyboard = false
         showEmojiPicker = false
         useRomajiInput = false
+        bufferCursorPosition = nil
+        isTrackpadActive = false
         hangulComposer.reset()
         romajiConverter.reset()
     }
@@ -147,12 +156,18 @@ final class LingoKeyboardState {
             suggestionManager.textDidChange(proxy: proxy)
 
         case .jpToEn, .jpToKr:
-            let result = romajiConverter.process(char)
-            hiraganaBuffer = romajiConverter.displayText
-            if result.converted {
-                // Don't insert into proxy; show in preview only
+            if bufferCursorPosition != nil {
+                // When cursor is positioned mid-buffer, insert raw char
+                insertIntoBuffer(char)
+                suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
+            } else {
+                let result = romajiConverter.process(char)
+                hiraganaBuffer = romajiConverter.displayText
+                if result.converted {
+                    // Don't insert into proxy; show in preview only
+                }
+                suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
             }
-            suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
         }
     }
 
@@ -165,8 +180,13 @@ final class LingoKeyboardState {
         if kana.hasPrefix("\u{0008}") {
             let replacement = String(kana.dropFirst())
             if !hiraganaBuffer.isEmpty {
-                hiraganaBuffer.removeLast()
-                hiraganaBuffer += replacement
+                if bufferCursorPosition != nil {
+                    deleteFromBuffer()
+                    insertIntoBuffer(replacement)
+                } else {
+                    hiraganaBuffer.removeLast()
+                    hiraganaBuffer += replacement
+                }
             } else {
                 // Already committed to proxy – replace there
                 controller?.textDocumentProxy.deleteBackward()
@@ -176,7 +196,7 @@ final class LingoKeyboardState {
             return
         }
 
-        hiraganaBuffer += kana
+        insertIntoBuffer(kana)
         suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
     }
 
@@ -185,7 +205,16 @@ final class LingoKeyboardState {
     func handleModifierToggle() {
         confirmCurrentCycle()
         guard !hiraganaBuffer.isEmpty else { return }
-        let last = hiraganaBuffer.last!
+
+        // Determine the character to modify based on cursor position
+        let combined = confirmedText + hiraganaBuffer
+        let pos = effectiveCursorPosition
+        guard pos > 0 else { return }
+        let charIndex = combined.index(combined.startIndex, offsetBy: pos - 1)
+        let last = combined[charIndex]
+
+        // Only operate on hiraganaBuffer portion
+        guard pos > confirmedText.count else { return }
 
         // Find the original (base) character
         let original: Character
@@ -215,8 +244,10 @@ final class LingoKeyboardState {
         let currentIndex = cycle.firstIndex(of: last) ?? 0
         let nextIndex = (currentIndex + 1) % cycle.count
 
-        hiraganaBuffer.removeLast()
-        hiraganaBuffer.append(cycle[nextIndex])
+        // Replace in hiraganaBuffer at the correct position
+        let bufferOffset = pos - confirmedText.count - 1
+        let bufIdx = hiraganaBuffer.index(hiraganaBuffer.startIndex, offsetBy: bufferOffset)
+        hiraganaBuffer.replaceSubrange(bufIdx...bufIdx, with: String(cycle[nextIndex]))
         suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
     }
 
@@ -234,7 +265,11 @@ final class LingoKeyboardState {
             // Same key within timeout → cycle to next character
             tapCycleIndex = (tapCycleIndex + 1) % cycle.count
             if !hiraganaBuffer.isEmpty {
-                hiraganaBuffer.removeLast()
+                if bufferCursorPosition != nil {
+                    deleteFromBuffer()
+                } else {
+                    hiraganaBuffer.removeLast()
+                }
             }
         } else {
             // Different key or timeout expired → confirm previous, start new cycle
@@ -244,7 +279,7 @@ final class LingoKeyboardState {
             tapCycleChars = cycle
         }
 
-        hiraganaBuffer += cycle[tapCycleIndex]
+        insertIntoBuffer(cycle[tapCycleIndex])
         lastTapTime = now
         startTapCycleTimer()
         suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
@@ -289,6 +324,80 @@ final class LingoKeyboardState {
         }
     }
 
+    // MARK: - Trackpad Cursor Movement
+
+    func activateTrackpad() {
+        confirmCurrentCycle()
+        if !romajiConverter.displayText.isEmpty && hiraganaBuffer.isEmpty {
+            hiraganaBuffer = romajiConverter.displayText
+        }
+        romajiConverter.reset()
+        isTrackpadActive = true
+        let combined = confirmedText + hiraganaBuffer
+        if bufferCursorPosition == nil {
+            bufferCursorPosition = combined.count
+        }
+    }
+
+    func deactivateTrackpad() {
+        isTrackpadActive = false
+    }
+
+    func moveBufferCursor(direction: CursorDirection) {
+        let combined = confirmedText + hiraganaBuffer
+        let pos = bufferCursorPosition ?? combined.count
+        switch direction {
+        case .left:
+            if pos > 0 { bufferCursorPosition = pos - 1 }
+        case .right:
+            if pos < combined.count {
+                let newPos = pos + 1
+                bufferCursorPosition = newPos == combined.count ? nil : newPos
+            }
+        }
+    }
+
+    func resetCursorToEnd() {
+        bufferCursorPosition = nil
+    }
+
+    private var effectiveCursorPosition: Int {
+        bufferCursorPosition ?? (confirmedText.count + hiraganaBuffer.count)
+    }
+
+    private func insertIntoBuffer(_ text: String) {
+        let pos = effectiveCursorPosition
+        if bufferCursorPosition == nil {
+            hiraganaBuffer += text
+        } else if pos >= confirmedText.count {
+            let idx = hiraganaBuffer.index(hiraganaBuffer.startIndex, offsetBy: pos - confirmedText.count)
+            hiraganaBuffer.insert(contentsOf: text, at: idx)
+            bufferCursorPosition = pos + text.count
+        } else {
+            let idx = confirmedText.index(confirmedText.startIndex, offsetBy: pos)
+            confirmedText.insert(contentsOf: text, at: idx)
+            bufferCursorPosition = pos + text.count
+        }
+    }
+
+    private func deleteFromBuffer() {
+        let pos = effectiveCursorPosition
+        guard pos > 0 else { return }
+
+        if pos > confirmedText.count {
+            let bufIdx = pos - confirmedText.count - 1
+            let idx = hiraganaBuffer.index(hiraganaBuffer.startIndex, offsetBy: bufIdx)
+            hiraganaBuffer.remove(at: idx)
+        } else {
+            let idx = confirmedText.index(confirmedText.startIndex, offsetBy: pos - 1)
+            confirmedText.remove(at: idx)
+        }
+
+        let newPos = pos - 1
+        let totalLen = confirmedText.count + hiraganaBuffer.count
+        bufferCursorPosition = newPos == totalLen ? nil : newPos
+    }
+
     // MARK: - Backspace
 
     func handleBackspace() {
@@ -313,7 +422,14 @@ final class LingoKeyboardState {
             suggestionManager.textDidChange(proxy: proxy)
 
         case .jpToEn, .jpToKr:
-            if !hiraganaBuffer.isEmpty {
+            if bufferCursorPosition != nil {
+                deleteFromBuffer()
+                suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
+                if confirmedText.isEmpty && hiraganaBuffer.isEmpty {
+                    suggestions = []
+                    resetCursorToEnd()
+                }
+            } else if !hiraganaBuffer.isEmpty {
                 hiraganaBuffer.removeLast()
                 suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
             } else if !romajiConverter.displayText.isEmpty {
@@ -321,7 +437,6 @@ final class LingoKeyboardState {
                 hiraganaBuffer = romajiConverter.displayText
                 suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
             } else if !confirmedText.isEmpty {
-                // Delete from confirmed text
                 confirmedText.removeLast()
                 if confirmedText.isEmpty {
                     suggestions = []
@@ -405,6 +520,7 @@ final class LingoKeyboardState {
                 }
             }
         }
+        resetCursorToEnd()
     }
 
     func applySuggestion(_ suggestion: Suggestion) {
@@ -417,6 +533,7 @@ final class LingoKeyboardState {
             hiraganaBuffer = ""
             romajiConverter.reset()
             suggestions = []
+            resetCursorToEnd()
             return
         }
 
@@ -427,6 +544,7 @@ final class LingoKeyboardState {
             hiraganaBuffer = ""
             romajiConverter.reset()
         }
+        resetCursorToEnd()
     }
 
     var textDocumentProxy: UITextDocumentProxy? {

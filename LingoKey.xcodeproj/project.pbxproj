@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B800000009 /* TrackpadSpaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80000000A /* TrackpadSpaceBar.swift */; };
 		07AD2E6AE35D551A338D50D7 /* ClaudeAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5322EDBA744A30BC9E36413 /* ClaudeAPIModels.swift */; };
 		0FEE264D4AB8F9AB16351F16 /* ModeTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */; };
 		136C49B3B2E55B63A7594BF7 /* LingoKeyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49694B89DD4939C24F3B20A7 /* LingoKeyApp.swift */; };
@@ -90,6 +91,7 @@
 		75D0BECAAD0358F9F9690C2E /* LingoKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LingoKeyboardView.swift; sourceTree = "<group>"; };
 		7C127D4A6DDF09309A707324 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8B1D10201DAD889D2731E252 /* RepeatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingButton.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B80000000A /* TrackpadSpaceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadSpaceBar.swift; sourceTree = "<group>"; };
 		8F3F71348AA5E6B46D2BEEF8 /* HangulKeyboardLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangulKeyboardLayoutView.swift; sourceTree = "<group>"; };
 		931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionManager.swift; sourceTree = "<group>"; };
 		A6942B0C220C4D66470B5182 /* HiraganaPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiraganaPreviewView.swift; sourceTree = "<group>"; };
@@ -212,6 +214,7 @@
 				63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */,
 				C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */,
 				8B1D10201DAD889D2731E252 /* RepeatingButton.swift */,
+				A1B2C3D4E5F6A7B80000000A /* TrackpadSpaceBar.swift */,
 				070938AC1BF83DC497E44029 /* SuggestionBarView.swift */,
 			);
 			path = Views;
@@ -381,6 +384,7 @@
 				F1ADF37A78BDB45D7CA033EA /* SuggestionBarView.swift in Sources */,
 				D7C2F14A51D3A4DFB83B0473 /* SuggestionManager.swift in Sources */,
 				5648A42DCA9BC1135E30DAFC /* TextReplacementService.swift in Sources */,
+				A1B2C3D4E5F6A7B800000009 /* TrackpadSpaceBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
