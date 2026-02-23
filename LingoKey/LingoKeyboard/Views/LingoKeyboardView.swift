@@ -255,28 +255,28 @@ enum KeyboardColors {
     /// Regular letter key background.
     static let key = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
-            ? UIColor(red: 62.0/255.0, green: 62.0/255.0, blue: 63.0/255.0, alpha: 1)
+            ? UIColor(red: 145.0/255.0, green: 145.0/255.0, blue: 147.0/255.0, alpha: 0.4)  // #919193 半透明
             : .white
     })
 
     /// Pressed / dragging state for regular keys.
     static let keyPressed = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
-            ? UIColor(white: 0.42, alpha: 1)
+            ? UIColor(red: 145.0/255.0, green: 145.0/255.0, blue: 147.0/255.0, alpha: 0.25)  // #919193 pressed
             : UIColor(red: 0.75, green: 0.76, blue: 0.78, alpha: 1)
     })
 
-    /// Special key background (shift, backspace, 123, return, etc.).
+    /// Special key background (shift, backspace, 123, return, etc.) — same as regular keys.
     static let specialKey = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
-            ? UIColor(white: 0.16, alpha: 1)
+            ? UIColor(red: 145.0/255.0, green: 145.0/255.0, blue: 147.0/255.0, alpha: 0.4)  // #919193 半透明
             : UIColor(red: 0.73, green: 0.75, blue: 0.78, alpha: 1)  // #BAC0C7
     })
 
-    /// Pressed state for special keys.
+    /// Pressed state for special keys — same as regular keys.
     static let specialKeyPressed = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
-            ? UIColor(white: 0.28, alpha: 1)
+            ? UIColor(red: 145.0/255.0, green: 145.0/255.0, blue: 147.0/255.0, alpha: 0.25)  // #919193 pressed
             : UIColor(red: 0.64, green: 0.66, blue: 0.69, alpha: 1)
     })
 
