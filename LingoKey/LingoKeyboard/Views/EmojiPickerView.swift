@@ -1,9 +1,17 @@
 import SwiftUI
 
+private struct FlatEmoji: Identifiable {
+    let id: String
+    let emoji: String
+    let categoryIndex: Int
+    let isFirstInCategory: Bool
+}
+
 struct EmojiPickerView: View {
     let onEmoji: (String) -> Void
     let onBackspace: () -> Void
     let onDismiss: () -> Void
+    let dismissLabel: String
 
     @State private var selectedCategory = 0
 
@@ -83,80 +91,93 @@ struct EmojiPickerView: View {
                  "💢","♨️","🚷","🚯","🚳","🚱","🔞","📵","🚭","❗"])
     ]
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 8)
+    private let rows = Array(repeating: GridItem(.flexible(), spacing: 4), count: 5)
+
+    private var flatEmojis: [FlatEmoji] {
+        categories.enumerated().flatMap { (catIdx, cat) in
+            cat.emojis.enumerated().map { (emojiIdx, emoji) in
+                FlatEmoji(
+                    id: "\(catIdx)-\(emojiIdx)",
+                    emoji: emoji,
+                    categoryIndex: catIdx,
+                    isFirstInCategory: emojiIdx == 0
+                )
+            }
+        }
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Category tabs
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(Array(categories.enumerated()), id: \.offset) { index, cat in
-                        Button {
-                            selectedCategory = index
-                        } label: {
-                            Text(cat.icon)
-                                .font(.system(size: 22))
-                                .padding(.vertical, 4)
-                                .padding(.horizontal, 4)
-                                .background(
-                                    selectedCategory == index
-                                        ? Color.accentColor.opacity(0.2)
-                                        : Color.clear
-                                )
-                                .cornerRadius(6)
+        ScrollViewReader { proxy in
+            VStack(spacing: 0) {
+                // Emoji grid — horizontal scroll, continuous across categories
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHGrid(rows: rows, spacing: 4) {
+                        ForEach(flatEmojis) { item in
+                            Button {
+                                onEmoji(item.emoji)
+                            } label: {
+                                Text(item.emoji)
+                                    .font(.system(size: 28))
+                                    .frame(width: 40, height: 40)
+                            }
+                            .buttonStyle(.plain)
+                            .id(item.id)
+                            .onAppear {
+                                if item.isFirstInCategory {
+                                    selectedCategory = item.categoryIndex
+                                }
+                            }
                         }
-                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 4)
+                }
+                .frame(height: 200)
+
+                // Bottom bar: dismiss label | category icons | delete
+                HStack(spacing: 0) {
+                    // Left: dismiss button (plain text style)
+                    Button { onDismiss() } label: {
+                        Text(dismissLabel)
+                            .font(.system(size: 15))
+                            .foregroundColor(.primary)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(width: 50)
+
+                    // Center: category icon tabs
+                    HStack(spacing: 0) {
+                        ForEach(categories.indices, id: \.self) { index in
+                            Button {
+                                selectedCategory = index
+                                proxy.scrollTo("\(index)-0", anchor: .leading)
+                            } label: {
+                                Text(categories[index].icon)
+                                    .font(.system(size: 16))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        selectedCategory == index
+                                            ? Color.primary.opacity(0.12)
+                                            : Color.clear
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    // Right: delete button (no background)
+                    RepeatingButton(action: onBackspace) {
+                        Image(systemName: "delete.left")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.primary)
+                            .frame(width: 40, height: 36)
                     }
                 }
-                .padding(.horizontal, 8)
-            }
-            .frame(height: 36)
-
-            Divider()
-
-            // Emoji grid
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 4) {
-                    ForEach(categories[selectedCategory].emojis, id: \.self) { emoji in
-                        Button {
-                            onEmoji(emoji)
-                        } label: {
-                            Text(emoji)
-                                .font(.system(size: 28))
-                                .frame(maxWidth: .infinity, minHeight: 40)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+                .frame(height: 36)
                 .padding(.horizontal, 4)
-                .padding(.vertical, 4)
             }
-            .frame(height: 160)
-
-            Divider()
-
-            // Bottom row: ABC + backspace
-            HStack(spacing: 4) {
-                Button("ABC") {
-                    onDismiss()
-                }
-                .buttonStyle(SpecialKeyStyle())
-                .frame(width: 70)
-
-                Spacer()
-
-                RepeatingButton(action: onBackspace) {
-                    Image(systemName: "delete.left")
-                        .font(.system(size: 15))
-                        .foregroundStyle(.primary)
-                        .frame(width: 36, height: 42)
-                        .background(KeyboardColors.specialKey)
-                        .cornerRadius(5)
-                        .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
-                }
-            }
-            .padding(.horizontal, 3)
-            .padding(.vertical, 4)
         }
     }
 }

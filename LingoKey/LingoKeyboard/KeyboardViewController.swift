@@ -9,6 +9,16 @@ class KeyboardViewController: KeyboardInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         keyboardState.loadSettings()
+        // Use system keyboard-style translucent background (like Apple's native keyboard)
+        if let iv = inputView {
+            let kbView = UIInputView(frame: iv.frame, inputViewStyle: .keyboard)
+            kbView.allowsSelfSizing = true
+            // Move existing subviews
+            for sub in iv.subviews {
+                kbView.addSubview(sub)
+            }
+            inputView = kbView
+        }
     }
 
     override func viewWillSetupKeyboardView() {

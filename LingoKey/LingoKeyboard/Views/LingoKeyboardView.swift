@@ -34,7 +34,6 @@ struct LingoKeyboardView: View {
             // Keyboard layout
             keyboardContent
         }
-        .background(KeyboardColors.background)
     }
 
     @ViewBuilder
@@ -43,7 +42,10 @@ struct LingoKeyboardView: View {
             EmojiPickerView(
                 onEmoji: { lingoState.handleEmojiInput($0) },
                 onBackspace: { lingoState.handleBackspace() },
-                onDismiss: { lingoState.dismissEmojiPicker() }
+                onDismiss: { lingoState.dismissEmojiPicker() },
+                dismissLabel: lingoState.currentMode.isJapaneseInput && !lingoState.useRomajiInput
+                    ? "あいう"
+                    : "ABC"
             )
         } else if lingoState.showNumberKeyboard {
             NumberSymbolKeyboardView(
@@ -247,7 +249,7 @@ enum KeyboardColors {
     static let background = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
             ? UIColor(white: 0.05, alpha: 1)
-            : UIColor(red: 0.84, green: 0.85, blue: 0.87, alpha: 1)  // #D6D9DE
+            : UIColor(red: 0.867, green: 0.875, blue: 0.890, alpha: 1)  // #DDDFE3
     })
 
     /// Regular letter key background.
