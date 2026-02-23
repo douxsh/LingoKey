@@ -29,7 +29,10 @@ struct NumberSymbolKeyboardView: View {
         GeometryReader { geo in
             let aw = geo.size.width - hPad * 2
             let kw = (aw - ksp * 9) / 10
-            let sideW = (aw - kw * 5 - ksp * 6) / 2
+            // #+= and ⌫ use same width as QWERTY shift/backspace
+            let sideW = (aw - kw * 7 - ksp * 8) / 2
+            // Row 3 middle keys expand to fill remaining space
+            let row3kw = (aw - sideW * 2 - ksp * 6) / 5
 
             let rows = showPage2
                 ? (page2Row1, page2Row2, page2Row3)
@@ -41,7 +44,7 @@ struct NumberSymbolKeyboardView: View {
 
                 HStack(spacing: ksp) {
                     togglePageButton(width: sideW)
-                    charRow(rows.2, keyWidth: kw)
+                    charRow(rows.2, keyWidth: row3kw)
                     backspaceBtn(width: sideW)
                 }
 

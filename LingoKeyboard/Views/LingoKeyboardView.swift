@@ -243,7 +243,7 @@ enum KeyboardColors {
     /// Regular letter key background.
     static let key = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
-            ? UIColor(white: 0.31, alpha: 1)
+            ? UIColor(red: 62.0/255.0, green: 62.0/255.0, blue: 63.0/255.0, alpha: 1)
             : .white
     })
 
