@@ -48,6 +48,14 @@ final class LingoKeyboardState {
     @ObservationIgnored let hangulComposer = HangulComposer()
     @ObservationIgnored let romajiConverter = RomajiToHiraganaConverter()
     @ObservationIgnored let apiService = LLMAPIService()
+
+    // Toggle input (tap-cycling) state
+    @ObservationIgnored private var lastTappedKeyCenter: String = ""
+    @ObservationIgnored private var tapCycleChars: [String] = []
+    @ObservationIgnored private var tapCycleIndex: Int = 0
+    @ObservationIgnored private var lastTapTime: Date = .distantPast
+    @ObservationIgnored private var tapCycleTimer: Timer?
+    @ObservationIgnored private let tapCycleTimeout: TimeInterval = 0.7
     @ObservationIgnored let localConverter = LocalKanaKanjiConverter()
 
     init(controller: KeyboardViewController?) {
@@ -151,6 +159,7 @@ final class LingoKeyboardState {
     // MARK: - Flick (Kana) Input
 
     func handleKana(_ kana: String) {
+        confirmCurrentCycle()
         // Handle punctuation cycling: "\u{0008}" prefix means
         // "delete last char, then insert the rest" (repeated-tap replacement).
         if kana.hasPrefix("\u{0008}") {
@@ -174,6 +183,7 @@ final class LingoKeyboardState {
     /// Cycles: original → small kana → dakuten → handakuten → original
     /// If no small kana: original → dakuten → handakuten → original
     func handleModifierToggle() {
+        confirmCurrentCycle()
         guard !hiraganaBuffer.isEmpty else { return }
         let last = hiraganaBuffer.last!
 
@@ -210,9 +220,79 @@ final class LingoKeyboardState {
         suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
     }
 
+    // MARK: - Toggle Input (Tap-Cycling)
+
+    /// Handles repeated taps on the same flick key: た→ち→つ→て→と
+    func handleKanaTap(_ key: FlickKeyMap.FlickKey) {
+        let now = Date()
+        let cycle = key.toggleCycle
+        guard !cycle.isEmpty else { return }
+
+        if key.center == lastTappedKeyCenter,
+           now.timeIntervalSince(lastTapTime) < tapCycleTimeout,
+           !tapCycleChars.isEmpty {
+            // Same key within timeout → cycle to next character
+            tapCycleIndex = (tapCycleIndex + 1) % cycle.count
+            if !hiraganaBuffer.isEmpty {
+                hiraganaBuffer.removeLast()
+            }
+        } else {
+            // Different key or timeout expired → confirm previous, start new cycle
+            confirmCurrentCycle()
+            tapCycleIndex = 0
+            lastTappedKeyCenter = key.center
+            tapCycleChars = cycle
+        }
+
+        hiraganaBuffer += cycle[tapCycleIndex]
+        lastTapTime = now
+        startTapCycleTimer()
+        suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
+    }
+
+    // MARK: - Advance Cursor (→ key)
+
+    /// Confirms the current cycling character so the next tap starts a new character.
+    func handleAdvanceCursor() {
+        confirmCurrentCycle()
+    }
+
+    // MARK: - Undo Kana (↩ key)
+
+    /// Reverts one step in the tap-cycling sequence (e.g., ち → た).
+    func handleUndoKana() {
+        guard !tapCycleChars.isEmpty, tapCycleIndex > 0 else { return }
+        tapCycleIndex -= 1
+        if !hiraganaBuffer.isEmpty {
+            hiraganaBuffer.removeLast()
+        }
+        hiraganaBuffer += tapCycleChars[tapCycleIndex]
+        lastTapTime = Date()
+        startTapCycleTimer()
+        suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
+    }
+
+    /// Ends the current tap cycle, locking in the current character.
+    private func confirmCurrentCycle() {
+        tapCycleTimer?.invalidate()
+        tapCycleTimer = nil
+        lastTappedKeyCenter = ""
+        tapCycleChars = []
+        tapCycleIndex = 0
+        lastTapTime = .distantPast
+    }
+
+    private func startTapCycleTimer() {
+        tapCycleTimer?.invalidate()
+        tapCycleTimer = Timer.scheduledTimer(withTimeInterval: tapCycleTimeout, repeats: false) { [weak self] _ in
+            self?.confirmCurrentCycle()
+        }
+    }
+
     // MARK: - Backspace
 
     func handleBackspace() {
+        confirmCurrentCycle()
         guard let proxy = controller?.textDocumentProxy else { return }
 
         switch currentMode {
@@ -257,6 +337,7 @@ final class LingoKeyboardState {
     // MARK: - Space / Return
 
     func handleSpace() {
+        confirmCurrentCycle()
         guard let proxy = controller?.textDocumentProxy else { return }
 
         switch currentMode {
@@ -280,6 +361,7 @@ final class LingoKeyboardState {
     }
 
     func handleReturn() {
+        confirmCurrentCycle()
         guard let proxy = controller?.textDocumentProxy else { return }
 
         if currentMode == .krCorrection {

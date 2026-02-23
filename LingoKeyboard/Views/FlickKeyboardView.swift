@@ -11,11 +11,14 @@ import SwiftUI
 /// ```
 struct FlickKeyboardView: View {
     let onKana: (String) -> Void
+    let onKanaTap: (FlickKeyMap.FlickKey) -> Void
     let onModifierToggle: () -> Void
     let onBackspace: () -> Void
     let onSpace: () -> Void
     let onReturn: () -> Void
     let onSwitchToRomaji: () -> Void
+    let onAdvanceCursor: () -> Void
+    let onUndoKana: () -> Void
     var onToggleEmojiPicker: (() -> Void)? = nil
     var isComposing: Bool = false
 
@@ -51,7 +54,7 @@ struct FlickKeyboardView: View {
 
     private var row0: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(systemImage: "arrow.right") { }
+            flickSideButton(systemImage: "arrow.right") { onAdvanceCursor() }
             flickCells(for: FlickKeyMap.kanaGrid[0])
             flickRepeatingBackspace
         }
@@ -59,7 +62,7 @@ struct FlickKeyboardView: View {
 
     private var row1: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(systemImage: "arrow.counterclockwise") { }
+            flickSideButton(systemImage: "arrow.counterclockwise") { onUndoKana() }
             flickCells(for: FlickKeyMap.kanaGrid[1])
             flickSideButton(label: "空白") { onSpace() }
         }
@@ -92,7 +95,7 @@ struct FlickKeyboardView: View {
                     }
                     .buttonStyle(FlickSpecialKeyStyle())
                     // わ key (flick)
-                    FlickKeyCell(flickKey: FlickKeyMap.kanaWa, onKana: onKana, height: rowHeight)
+                    FlickKeyCell(flickKey: FlickKeyMap.kanaWa, onKana: onKana, onTap: onKanaTap, height: rowHeight)
                     // 、 key (flick + repeated-tap cycling: 、→。→？→！)
                     PunctuationFlickKeyCell(flickKey: FlickKeyMap.punctuation, onKana: onKana, height: rowHeight)
                 }
@@ -132,7 +135,7 @@ struct FlickKeyboardView: View {
 
     private func flickCells(for keys: [FlickKeyMap.FlickKey]) -> some View {
         ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
-            FlickKeyCell(flickKey: key, onKana: onKana, height: rowHeight)
+            FlickKeyCell(flickKey: key, onKana: onKana, onTap: onKanaTap, height: rowHeight)
         }
     }
 
@@ -163,6 +166,7 @@ struct FlickKeyboardView: View {
 private struct FlickKeyCell: View {
     let flickKey: FlickKeyMap.FlickKey
     let onKana: (String) -> Void
+    var onTap: ((FlickKeyMap.FlickKey) -> Void)? = nil
     let height: CGFloat
 
     @State private var activeDirection: FlickKeyMap.Direction? = nil
@@ -192,8 +196,13 @@ private struct FlickKeyCell: View {
                     }
                     .onEnded { value in
                         let dir = direction(from: value.translation)
-                        let kana = flickKey.kana(for: dir)
-                        onKana(kana)
+                        if dir == .center, let onTap {
+                            // Tap (no swipe) → toggle cycling (た→ち→つ→て→と)
+                            onTap(flickKey)
+                        } else {
+                            // Flick (swipe) → direct character input
+                            onKana(flickKey.kana(for: dir))
+                        }
                         isDragging = false
                         activeDirection = nil
                     }

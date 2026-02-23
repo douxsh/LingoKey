@@ -64,11 +64,14 @@ struct LingoKeyboardView: View {
         } else if lingoState.currentMode.isJapaneseInput && !lingoState.useRomajiInput {
             FlickKeyboardView(
                 onKana: { lingoState.handleKana($0) },
+                onKanaTap: { lingoState.handleKanaTap($0) },
                 onModifierToggle: { lingoState.handleModifierToggle() },
                 onBackspace: { lingoState.handleBackspace() },
                 onSpace: { lingoState.handleSpace() },
                 onReturn: { lingoState.handleReturn() },
                 onSwitchToRomaji: { lingoState.switchToRomajiInput() },
+                onAdvanceCursor: { lingoState.handleAdvanceCursor() },
+                onUndoKana: { lingoState.handleUndoKana() },
                 onToggleEmojiPicker: { lingoState.toggleEmojiPicker() },
                 isComposing: !lingoState.hiraganaBuffer.isEmpty
             )

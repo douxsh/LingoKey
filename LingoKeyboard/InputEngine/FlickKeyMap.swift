@@ -20,6 +20,11 @@ enum FlickKeyMap {
         let right: String
         let down: String
 
+        /// Characters in toggle-tap order: center → left → up → right → down
+        var toggleCycle: [String] {
+            [center, left, up, right, down].filter { !$0.isEmpty }
+        }
+
         func kana(for direction: Direction) -> String {
             switch direction {
             case .center: return center
