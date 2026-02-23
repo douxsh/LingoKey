@@ -1,0 +1,15 @@
+import Foundation
+
+enum AppGroupConstants {
+    static let suiteName = "group.com.lingokey.shared"
+
+    enum Keys {
+        static let apiKey = "claude_api_key"
+        static let defaultMode = "default_keyboard_mode"
+        static let onboardingCompleted = "onboarding_completed"
+    }
+
+    static var sharedDefaults: UserDefaults? {
+        UserDefaults(suiteName: suiteName)
+    }
+}

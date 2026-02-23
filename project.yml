@@ -1,0 +1,53 @@
+name: LingoKey
+options:
+  bundleIdPrefix: com.lingokey
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+
+packages:
+  KeyboardKit:
+    url: https://github.com/KeyboardKit/KeyboardKit
+    from: "9.0.0"
+  AzooKeyKanaKanjiConverter:
+    url: https://github.com/azooKey/AzooKeyKanaKanjiConverter
+    from: "0.8.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1"
+
+targets:
+  LingoKey:
+    type: application
+    platform: iOS
+    sources:
+      - path: LingoKey
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lingokey.app
+        INFOPLIST_FILE: LingoKey/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: LingoKey/LingoKey.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - target: LingoKeyboard
+
+  LingoKeyboard:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LingoKeyboard
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lingokey.app.keyboard
+        INFOPLIST_FILE: LingoKeyboard/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: LingoKeyboard/LingoKeyboard.entitlements
+        SKIP_INSTALL: true
+    dependencies:
+      - package: KeyboardKit
+      - package: AzooKeyKanaKanjiConverter
+        product: KanaKanjiConverterModuleWithDefaultDictionary

@@ -1,0 +1,656 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07AD2E6AE35D551A338D50D7 /* ClaudeAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5322EDBA744A30BC9E36413 /* ClaudeAPIModels.swift */; };
+		0FEE264D4AB8F9AB16351F16 /* ModeTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */; };
+		136C49B3B2E55B63A7594BF7 /* LingoKeyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49694B89DD4939C24F3B20A7 /* LingoKeyApp.swift */; };
+		13A5117F7E8FBC5EDED8E78C /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE44AFD5A193DEF23801B445 /* OnboardingView.swift */; };
+		1D43E598CF79140E1E63810A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304B200837C2A3405DC7B4FC /* SettingsView.swift */; };
+		1F06B5B45D6EC5B28C37E603 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7179F95F226FD06FD0331433 /* ContentView.swift */; };
+		2D7317A4CBD85379073B86F0 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E5E271A4F2DC8332554B5F /* SharedSettings.swift */; };
+		49C91FDCEB7E9687BC63D8D9 /* Suggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACD62992465F912F3784F4C /* Suggestion.swift */; };
+		4C34F7CCC568F8B7ACA28B72 /* AppGroupConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AC3EB7F1A377D7E9873082 /* AppGroupConstants.swift */; };
+		5648A42DCA9BC1135E30DAFC /* TextReplacementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675312619FDD6BC24EAB087B /* TextReplacementService.swift */; };
+		5B1107AE55BB3B835A8578DA /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */ = {isa = PBXBuildFile; productRef = 32EF3D72D9E3EEAB2A77175C /* KanaKanjiConverterModuleWithDefaultDictionary */; };
+		5C3FA58C3BF26CF69231E1B2 /* AppGroupConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AC3EB7F1A377D7E9873082 /* AppGroupConstants.swift */; };
+		70C102E357A365DCB81E1A0F /* HiraganaPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6942B0C220C4D66470B5182 /* HiraganaPreviewView.swift */; };
+		720B0E2B118AD8EFA48490EB /* HangulKeyboardLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3F71348AA5E6B46D2BEEF8 /* HangulKeyboardLayoutView.swift */; };
+		7CA6E24BE0A3A52FACCC8C95 /* HangulComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF0895E9DEF32016B3BDC4A /* HangulComposer.swift */; };
+		86D8B47E3D38FD86C0F2D91F /* RomajiToHiraganaConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E657F60C0B08CD88354E35E /* RomajiToHiraganaConverter.swift */; };
+		972F81B174C75D0CA1EAAC0A /* RepeatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1D10201DAD889D2731E252 /* RepeatingButton.swift */; };
+		97A080E57391AA8ADC8591A6 /* FlickKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B144ADC82DF1D8BC58BC7D /* FlickKeyboardView.swift */; };
+		98E3A2D7E7901E828B78AEE3 /* ClaudeAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700AF6F5A2848B1DD66E3227 /* ClaudeAPIService.swift */; };
+		9FC42237E2A370505F0D3DC8 /* KeyboardMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51639F8AD874EE417EA0A347 /* KeyboardMode.swift */; };
+		A8557898E1DFFD4E35CBD48B /* FlickKeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76A5DE037167026690D0F2 /* FlickKeyMap.swift */; };
+		B7F1D605F4219D45DE7818F4 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E5E271A4F2DC8332554B5F /* SharedSettings.swift */; };
+		C27615E5320946887F55A1C0 /* KeyboardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5A31B60D4EF018EE146B1014 /* KeyboardKit */; };
+		C82E21E1679D6DC0CC598688 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19BCA77AD52496DAFB398AE1 /* Assets.xcassets */; };
+		CC2CD13375E6C63B991B3540 /* DubeolsikKeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7447A5488D7D06CA1D2710 /* DubeolsikKeyMap.swift */; };
+		D68D6D798F9BF805C9B99246 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE584C7837C5E8FFD53B0300 /* EmojiPickerView.swift */; };
+		D7C2F14A51D3A4DFB83B0473 /* SuggestionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */; };
+		EAA3F222464C70F355A3BECB /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A040AFE7A6996804937838 /* KeyboardViewController.swift */; };
+		EEA696B9BA846B6DB8EFA8A7 /* KeyboardMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51639F8AD874EE417EA0A347 /* KeyboardMode.swift */; };
+		F1ADF37A78BDB45D7CA033EA /* SuggestionBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070938AC1BF83DC497E44029 /* SuggestionBarView.swift */; };
+		F3CCD51B2CE9986BED5D1E20 /* LingoKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D0BECAAD0358F9F9690C2E /* LingoKeyboardView.swift */; };
+		F3F47C47DC76C8914DFA9D2E /* LingoKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 033A8D45FE9D3759EDF69821 /* LingoKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F81D57D22EBD7DBCBD74D5A1 /* NumberSymbolKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */; };
+		F968A9E9A8A5CFEC04EEC174 /* LocalKanaKanjiConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAB5B84DB6A3B107BC4F6F3 /* LocalKanaKanjiConverter.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		89542AC3F2047D715A04202E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B98516F9F0021EB19E511129 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EDC05922969BBDD422C43700;
+			remoteInfo = LingoKeyboard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		993FB0539B6C5F13186A2EE9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F3F47C47DC76C8914DFA9D2E /* LingoKeyboard.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		033A8D45FE9D3759EDF69821 /* LingoKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LingoKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		070938AC1BF83DC497E44029 /* SuggestionBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionBarView.swift; sourceTree = "<group>"; };
+		19BCA77AD52496DAFB398AE1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1A41746C9834C0557DD49448 /* LingoKeyboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LingoKeyboard.entitlements; sourceTree = "<group>"; };
+		23AC3EB7F1A377D7E9873082 /* AppGroupConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupConstants.swift; sourceTree = "<group>"; };
+		27A040AFE7A6996804937838 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		2CF0895E9DEF32016B3BDC4A /* HangulComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangulComposer.swift; sourceTree = "<group>"; };
+		2E657F60C0B08CD88354E35E /* RomajiToHiraganaConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomajiToHiraganaConverter.swift; sourceTree = "<group>"; };
+		304B200837C2A3405DC7B4FC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		350B68DC9D235993F0961542 /* LingoKey.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LingoKey.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D7447A5488D7D06CA1D2710 /* DubeolsikKeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DubeolsikKeyMap.swift; sourceTree = "<group>"; };
+		47E5E271A4F2DC8332554B5F /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
+		49694B89DD4939C24F3B20A7 /* LingoKeyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LingoKeyApp.swift; sourceTree = "<group>"; };
+		51639F8AD874EE417EA0A347 /* KeyboardMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMode.swift; sourceTree = "<group>"; };
+		5DAB5B84DB6A3B107BC4F6F3 /* LocalKanaKanjiConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalKanaKanjiConverter.swift; sourceTree = "<group>"; };
+		63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeTabBarView.swift; sourceTree = "<group>"; };
+		675312619FDD6BC24EAB087B /* TextReplacementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextReplacementService.swift; sourceTree = "<group>"; };
+		700AF6F5A2848B1DD66E3227 /* ClaudeAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAPIService.swift; sourceTree = "<group>"; };
+		7179F95F226FD06FD0331433 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		75D0BECAAD0358F9F9690C2E /* LingoKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LingoKeyboardView.swift; sourceTree = "<group>"; };
+		7C127D4A6DDF09309A707324 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8B1D10201DAD889D2731E252 /* RepeatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingButton.swift; sourceTree = "<group>"; };
+		8F3F71348AA5E6B46D2BEEF8 /* HangulKeyboardLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangulKeyboardLayoutView.swift; sourceTree = "<group>"; };
+		931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionManager.swift; sourceTree = "<group>"; };
+		A6942B0C220C4D66470B5182 /* HiraganaPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiraganaPreviewView.swift; sourceTree = "<group>"; };
+		AACD62992465F912F3784F4C /* Suggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Suggestion.swift; sourceTree = "<group>"; };
+		AE584C7837C5E8FFD53B0300 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
+		B0168AE010415CA5DEC95989 /* LingoKey.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LingoKey.entitlements; sourceTree = "<group>"; };
+		B5322EDBA744A30BC9E36413 /* ClaudeAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAPIModels.swift; sourceTree = "<group>"; };
+		C0B144ADC82DF1D8BC58BC7D /* FlickKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickKeyboardView.swift; sourceTree = "<group>"; };
+		C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberSymbolKeyboardView.swift; sourceTree = "<group>"; };
+		DE44AFD5A193DEF23801B445 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		DE76A5DE037167026690D0F2 /* FlickKeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickKeyMap.swift; sourceTree = "<group>"; };
+		ECCF930F107042747D4B9AB4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C1AB0B54F6715DF4C3695CF7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C27615E5320946887F55A1C0 /* KeyboardKit in Frameworks */,
+				5B1107AE55BB3B835A8578DA /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		002A728F6E43D91D799C4573 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B5322EDBA744A30BC9E36413 /* ClaudeAPIModels.swift */,
+				AACD62992465F912F3784F4C /* Suggestion.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		18A258CFCA936DE80653EDBF /* LingoKeyboard */ = {
+			isa = PBXGroup;
+			children = (
+				27A040AFE7A6996804937838 /* KeyboardViewController.swift */,
+				1A41746C9834C0557DD49448 /* LingoKeyboard.entitlements */,
+				87F4E861A4CE9435BA3956CD /* InputEngine */,
+				002A728F6E43D91D799C4573 /* Models */,
+				C380726982D20048B784F81A /* Resources */,
+				2A97089740E9863F5D40B876 /* Services */,
+				92C28885E2360AA2B914CE1B /* Views */,
+			);
+			path = LingoKeyboard;
+			sourceTree = "<group>";
+		};
+		2A97089740E9863F5D40B876 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				700AF6F5A2848B1DD66E3227 /* ClaudeAPIService.swift */,
+				5DAB5B84DB6A3B107BC4F6F3 /* LocalKanaKanjiConverter.swift */,
+				931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */,
+				675312619FDD6BC24EAB087B /* TextReplacementService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		4EE7889E6106DA5D1E23B612 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DE44AFD5A193DEF23801B445 /* OnboardingView.swift */,
+				304B200837C2A3405DC7B4FC /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		571CDA3CA31EF6B74DC5F88F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				350B68DC9D235993F0961542 /* LingoKey.app */,
+				033A8D45FE9D3759EDF69821 /* LingoKeyboard.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7C6285AB4CCB1714C4F9C909 = {
+			isa = PBXGroup;
+			children = (
+				8DB4E04EE4CDE618B9425868 /* LingoKey */,
+				18A258CFCA936DE80653EDBF /* LingoKeyboard */,
+				B6CB65EFCD82A3BA8A109B77 /* Shared */,
+				571CDA3CA31EF6B74DC5F88F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		87F4E861A4CE9435BA3956CD /* InputEngine */ = {
+			isa = PBXGroup;
+			children = (
+				3D7447A5488D7D06CA1D2710 /* DubeolsikKeyMap.swift */,
+				DE76A5DE037167026690D0F2 /* FlickKeyMap.swift */,
+				2CF0895E9DEF32016B3BDC4A /* HangulComposer.swift */,
+				2E657F60C0B08CD88354E35E /* RomajiToHiraganaConverter.swift */,
+			);
+			path = InputEngine;
+			sourceTree = "<group>";
+		};
+		8DB4E04EE4CDE618B9425868 /* LingoKey */ = {
+			isa = PBXGroup;
+			children = (
+				B0168AE010415CA5DEC95989 /* LingoKey.entitlements */,
+				EB6E9876A676F5C6DE94F50B /* App */,
+				97E8165E67B14EF455969795 /* Resources */,
+				4EE7889E6106DA5D1E23B612 /* Views */,
+			);
+			path = LingoKey;
+			sourceTree = "<group>";
+		};
+		92C28885E2360AA2B914CE1B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AE584C7837C5E8FFD53B0300 /* EmojiPickerView.swift */,
+				C0B144ADC82DF1D8BC58BC7D /* FlickKeyboardView.swift */,
+				8F3F71348AA5E6B46D2BEEF8 /* HangulKeyboardLayoutView.swift */,
+				A6942B0C220C4D66470B5182 /* HiraganaPreviewView.swift */,
+				75D0BECAAD0358F9F9690C2E /* LingoKeyboardView.swift */,
+				63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */,
+				C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */,
+				8B1D10201DAD889D2731E252 /* RepeatingButton.swift */,
+				070938AC1BF83DC497E44029 /* SuggestionBarView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		97E8165E67B14EF455969795 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				19BCA77AD52496DAFB398AE1 /* Assets.xcassets */,
+				7C127D4A6DDF09309A707324 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B6CB65EFCD82A3BA8A109B77 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				23AC3EB7F1A377D7E9873082 /* AppGroupConstants.swift */,
+				51639F8AD874EE417EA0A347 /* KeyboardMode.swift */,
+				47E5E271A4F2DC8332554B5F /* SharedSettings.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		C380726982D20048B784F81A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				ECCF930F107042747D4B9AB4 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		EB6E9876A676F5C6DE94F50B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				7179F95F226FD06FD0331433 /* ContentView.swift */,
+				49694B89DD4939C24F3B20A7 /* LingoKeyApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9C22A30164636B15488EC590 /* LingoKey */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9551A0E047A66D1011EA8B4 /* Build configuration list for PBXNativeTarget "LingoKey" */;
+			buildPhases = (
+				59F2CB9FBD5C78D8CDBE595F /* Sources */,
+				B8B7F06AB6F54A1F6B3A0946 /* Resources */,
+				993FB0539B6C5F13186A2EE9 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D83429DCDF9E188A45ADE353 /* PBXTargetDependency */,
+			);
+			name = LingoKey;
+			packageProductDependencies = (
+			);
+			productName = LingoKey;
+			productReference = 350B68DC9D235993F0961542 /* LingoKey.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EDC05922969BBDD422C43700 /* LingoKeyboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 529772A9504F2A0145924BA5 /* Build configuration list for PBXNativeTarget "LingoKeyboard" */;
+			buildPhases = (
+				93507FDBF45623FA9B5183B3 /* Sources */,
+				C1AB0B54F6715DF4C3695CF7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LingoKeyboard;
+			packageProductDependencies = (
+				5A31B60D4EF018EE146B1014 /* KeyboardKit */,
+				32EF3D72D9E3EEAB2A77175C /* KanaKanjiConverterModuleWithDefaultDictionary */,
+			);
+			productName = LingoKeyboard;
+			productReference = 033A8D45FE9D3759EDF69821 /* LingoKeyboard.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B98516F9F0021EB19E511129 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = 510DE0AB58942B350934FF16 /* Build configuration list for PBXProject "LingoKey" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7C6285AB4CCB1714C4F9C909;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				320FCF077C2109A957EC6BF1 /* XCRemoteSwiftPackageReference "AzooKeyKanaKanjiConverter" */,
+				474CCDBD0845E906C8462922 /* XCRemoteSwiftPackageReference "KeyboardKit" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9C22A30164636B15488EC590 /* LingoKey */,
+				EDC05922969BBDD422C43700 /* LingoKeyboard */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B8B7F06AB6F54A1F6B3A0946 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C82E21E1679D6DC0CC598688 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		59F2CB9FBD5C78D8CDBE595F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C34F7CCC568F8B7ACA28B72 /* AppGroupConstants.swift in Sources */,
+				1F06B5B45D6EC5B28C37E603 /* ContentView.swift in Sources */,
+				EEA696B9BA846B6DB8EFA8A7 /* KeyboardMode.swift in Sources */,
+				136C49B3B2E55B63A7594BF7 /* LingoKeyApp.swift in Sources */,
+				13A5117F7E8FBC5EDED8E78C /* OnboardingView.swift in Sources */,
+				1D43E598CF79140E1E63810A /* SettingsView.swift in Sources */,
+				B7F1D605F4219D45DE7818F4 /* SharedSettings.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		93507FDBF45623FA9B5183B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C3FA58C3BF26CF69231E1B2 /* AppGroupConstants.swift in Sources */,
+				07AD2E6AE35D551A338D50D7 /* ClaudeAPIModels.swift in Sources */,
+				98E3A2D7E7901E828B78AEE3 /* ClaudeAPIService.swift in Sources */,
+				CC2CD13375E6C63B991B3540 /* DubeolsikKeyMap.swift in Sources */,
+				D68D6D798F9BF805C9B99246 /* EmojiPickerView.swift in Sources */,
+				A8557898E1DFFD4E35CBD48B /* FlickKeyMap.swift in Sources */,
+				97A080E57391AA8ADC8591A6 /* FlickKeyboardView.swift in Sources */,
+				7CA6E24BE0A3A52FACCC8C95 /* HangulComposer.swift in Sources */,
+				720B0E2B118AD8EFA48490EB /* HangulKeyboardLayoutView.swift in Sources */,
+				70C102E357A365DCB81E1A0F /* HiraganaPreviewView.swift in Sources */,
+				9FC42237E2A370505F0D3DC8 /* KeyboardMode.swift in Sources */,
+				EAA3F222464C70F355A3BECB /* KeyboardViewController.swift in Sources */,
+				F3CCD51B2CE9986BED5D1E20 /* LingoKeyboardView.swift in Sources */,
+				F968A9E9A8A5CFEC04EEC174 /* LocalKanaKanjiConverter.swift in Sources */,
+				0FEE264D4AB8F9AB16351F16 /* ModeTabBarView.swift in Sources */,
+				F81D57D22EBD7DBCBD74D5A1 /* NumberSymbolKeyboardView.swift in Sources */,
+				972F81B174C75D0CA1EAAC0A /* RepeatingButton.swift in Sources */,
+				86D8B47E3D38FD86C0F2D91F /* RomajiToHiraganaConverter.swift in Sources */,
+				2D7317A4CBD85379073B86F0 /* SharedSettings.swift in Sources */,
+				49C91FDCEB7E9687BC63D8D9 /* Suggestion.swift in Sources */,
+				F1ADF37A78BDB45D7CA033EA /* SuggestionBarView.swift in Sources */,
+				D7C2F14A51D3A4DFB83B0473 /* SuggestionManager.swift in Sources */,
+				5648A42DCA9BC1135E30DAFC /* TextReplacementService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D83429DCDF9E188A45ADE353 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EDC05922969BBDD422C43700 /* LingoKeyboard */;
+			targetProxy = 89542AC3F2047D715A04202E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2AC120731828DAC875EDE7FD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LingoKeyboard/LingoKeyboard.entitlements;
+				DEVELOPMENT_TEAM = G2HZYNLXCN;
+				INFOPLIST_FILE = LingoKeyboard/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lingokey.app.keyboard;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3D98C813F1A191DAE12D7678 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		3E87C11A398A5DB9AA890E83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LingoKeyboard/LingoKeyboard.entitlements;
+				DEVELOPMENT_TEAM = G2HZYNLXCN;
+				INFOPLIST_FILE = LingoKeyboard/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lingokey.app.keyboard;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A702A36B3D16BF5DC861316C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LingoKey/LingoKey.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = G2HZYNLXCN;
+				INFOPLIST_FILE = LingoKey/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lingokey.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D4C9463A3B9B850B7AB32D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E72F55A61A90A6AF42A32200 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LingoKey/LingoKey.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = G2HZYNLXCN;
+				INFOPLIST_FILE = LingoKey/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lingokey.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		510DE0AB58942B350934FF16 /* Build configuration list for PBXProject "LingoKey" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4C9463A3B9B850B7AB32D03 /* Debug */,
+				3D98C813F1A191DAE12D7678 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		529772A9504F2A0145924BA5 /* Build configuration list for PBXNativeTarget "LingoKeyboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E87C11A398A5DB9AA890E83 /* Debug */,
+				2AC120731828DAC875EDE7FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C9551A0E047A66D1011EA8B4 /* Build configuration list for PBXNativeTarget "LingoKey" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A702A36B3D16BF5DC861316C /* Debug */,
+				E72F55A61A90A6AF42A32200 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		320FCF077C2109A957EC6BF1 /* XCRemoteSwiftPackageReference "AzooKeyKanaKanjiConverter" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/azooKey/AzooKeyKanaKanjiConverter";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.0;
+			};
+		};
+		474CCDBD0845E906C8462922 /* XCRemoteSwiftPackageReference "KeyboardKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/KeyboardKit/KeyboardKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		32EF3D72D9E3EEAB2A77175C /* KanaKanjiConverterModuleWithDefaultDictionary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 320FCF077C2109A957EC6BF1 /* XCRemoteSwiftPackageReference "AzooKeyKanaKanjiConverter" */;
+			productName = KanaKanjiConverterModuleWithDefaultDictionary;
+		};
+		5A31B60D4EF018EE146B1014 /* KeyboardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 474CCDBD0845E906C8462922 /* XCRemoteSwiftPackageReference "KeyboardKit" */;
+			productName = KeyboardKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = B98516F9F0021EB19E511129 /* Project object */;
+}
