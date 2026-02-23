@@ -54,7 +54,7 @@ final class SuggestionManager {
         guard !mode.isJapaneseInput else { return }
 
         let text = currentSentence(from: proxy)
-        let minLength = (mode == .enCorrection || mode == .krCorrection) ? 5 : 2
+        let minLength = mode == .enCorrection ? 5 : 2
 
         guard text.count >= minLength else {
             state.suggestions = []
