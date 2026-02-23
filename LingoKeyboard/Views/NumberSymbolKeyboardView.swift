@@ -93,7 +93,9 @@ struct NumberSymbolKeyboardView: View {
     }
 
     private func bottomRow(keyWidth: CGFloat, sideWidth: CGFloat, availableWidth: CGFloat) -> some View {
-        let confirmW = keyWidth + ksp + sideWidth
+        // Use QWERTY-equivalent sideW (7 middle keys) for consistent bottom row across modes
+        let qwertySideW = (availableWidth - keyWidth * 7 - ksp * 8) / 2
+        let confirmW = keyWidth + ksp + qwertySideW
         let spaceW = availableWidth - keyWidth * 2 - confirmW - ksp * 3
 
         return HStack(spacing: ksp) {
@@ -136,7 +138,7 @@ struct NumberSymbolKeyboardView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
-                    .background(Color.accentColor)
+                    .background(KeyboardColors.confirm)
                     .cornerRadius(5)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }

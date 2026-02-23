@@ -220,7 +220,7 @@ struct QwertyKeyboardView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
-                    .background(Color.accentColor)
+                    .background(KeyboardColors.confirm)
                     .cornerRadius(5)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
@@ -267,6 +267,9 @@ enum KeyboardColors {
             ? UIColor(white: 0.28, alpha: 1)
             : UIColor(red: 0.64, green: 0.66, blue: 0.69, alpha: 1)
     })
+
+    /// Confirm button blue — Apple system blue #007AFF.
+    static let confirm = Color(red: 0, green: 122.0/255.0, blue: 255.0/255.0)
 }
 
 // MARK: - Key Styles

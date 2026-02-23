@@ -137,7 +137,7 @@ struct HangulKeyboardLayoutView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
-                    .background(Color.accentColor)
+                    .background(KeyboardColors.confirm)
                     .cornerRadius(5)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
