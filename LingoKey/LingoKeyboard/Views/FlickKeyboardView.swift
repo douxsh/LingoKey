@@ -19,6 +19,7 @@ struct FlickKeyboardView: View {
     let onSwitchToRomaji: () -> Void
     let onAdvanceCursor: () -> Void
     let onUndoKana: () -> Void
+    var onToggleNumberKeyboard: (() -> Void)? = nil
     var onToggleEmojiPicker: (() -> Void)? = nil
     var isComposing: Bool = false
     var onCursorMove: ((LingoKeyboardState.CursorDirection) -> Void)? = nil
@@ -59,7 +60,7 @@ struct FlickKeyboardView: View {
 
     private var row0: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(systemImage: "arrow.right") { onAdvanceCursor() }
+            flickSideButton(label: "☆123", fontSize: 11) { onToggleNumberKeyboard?() }
             flickCells(for: FlickKeyMap.kanaGrid[0])
             flickRepeatingBackspace
         }
@@ -67,7 +68,7 @@ struct FlickKeyboardView: View {
 
     private var row1: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(systemImage: "arrow.counterclockwise") { onUndoKana() }
+            flickSideButton(label: "ABC") { onSwitchToRomaji() }
             flickCells(for: FlickKeyMap.kanaGrid[1])
             TrackpadSpaceBar(
                 onSpace: onSpace,
@@ -92,14 +93,16 @@ struct FlickKeyboardView: View {
         HStack(spacing: keySpacing) {
             // Columns 1-4: two rows stacked
             VStack(spacing: keySpacing) {
-                // Row 2: ABC | ま や ら
-                HStack(spacing: keySpacing) {
-                    flickSideButton(label: "ABC") { onSwitchToRomaji() }
-                    flickCells(for: FlickKeyMap.kanaGrid[2])
-                }
-                // Row 3: 😊 | ^^/小゛゜ わ 、。?!
+                // Row 2: 😊 | ま や ら
                 HStack(spacing: keySpacing) {
                     flickSideButton(systemImage: "face.smiling") { onToggleEmojiPicker?() }
+                    flickCells(for: FlickKeyMap.kanaGrid[2])
+                }
+                // Row 3: →/↩ | ^^/小゛゜ わ 、。?!
+                HStack(spacing: keySpacing) {
+                    flickSideButton(systemImage: isComposing ? "arrow.counterclockwise" : "arrow.right") {
+                        if isComposing { onUndoKana() } else { onAdvanceCursor() }
+                    }
                     // Context-dependent: kaomoji when not composing, modifier toggle when composing
                     Button {
                         if isComposing {
