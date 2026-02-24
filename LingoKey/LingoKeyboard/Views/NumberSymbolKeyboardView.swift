@@ -51,9 +51,10 @@ struct NumberSymbolKeyboardView: View {
                 bottomRow(keyWidth: kw, sideWidth: sideW, availableWidth: aw)
             }
             .padding(.horizontal, hPad)
-            .padding(.vertical, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
         }
-        .frame(height: keyH * 4 + rsp * 3 + 8)
+        .frame(height: keyH * 4 + rsp * 3 + 4)
     }
 
     private func charRow(_ keys: [String], keyWidth: CGFloat) -> some View {
@@ -76,20 +77,17 @@ struct NumberSymbolKeyboardView: View {
                 .font(.system(size: 15))
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
-                .background(KeyboardColors.specialKey)
-                .cornerRadius(8)
-                .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SpecialKeyStyle())
     }
 
     private func backspaceBtn(width: CGFloat) -> some View {
-        RepeatingButton(action: onBackspace) {
+        RepeatingButton(action: onBackspace) { pressed in
             Image(systemName: "delete.left")
                 .font(.system(size: 16))
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
-                .background(KeyboardColors.specialKey)
+                .background(pressed ? KeyboardColors.specialKeyPressed : KeyboardColors.specialKey)
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
@@ -107,11 +105,8 @@ struct NumberSymbolKeyboardView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(.primary)
                     .frame(width: keyWidth, height: keyH)
-                    .background(KeyboardColors.specialKey)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SpecialKeyStyle())
 
             Button {
                 onToggleEmojiPicker?()
@@ -119,33 +114,24 @@ struct NumberSymbolKeyboardView: View {
                 Image(systemName: "face.smiling")
                     .font(.system(size: 18))
                     .frame(width: keyWidth, height: keyH)
-                    .background(KeyboardColors.specialKey)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SpecialKeyStyle())
 
             Button {
                 onSpace()
             } label: {
                 Text("")
                     .frame(width: spaceW, height: keyH)
-                    .background(KeyboardColors.key)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(KeyButtonStyle())
 
             Button(action: { onReturn() }) {
                 Image(systemName: "checkmark")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
-                    .background(KeyboardColors.confirm)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConfirmKeyStyle())
         }
     }
 }

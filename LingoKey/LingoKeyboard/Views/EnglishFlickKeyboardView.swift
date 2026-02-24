@@ -18,7 +18,8 @@ struct EnglishFlickKeyboardView: View {
     let onSwitchToKana: () -> Void
     var onToggleEmojiPicker: (() -> Void)? = nil
 
-    @State private var isShifted = false
+    @State private var shiftState: ShiftState = .off
+    @State private var lastShiftTapTime: Date? = nil
 
     private let rowHeight: CGFloat = 46
     private let keySpacing: CGFloat = 6
@@ -38,11 +39,12 @@ struct EnglishFlickKeyboardView: View {
                 bottomRows
             }
             .padding(.horizontal, 5)
-            .padding(.vertical, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
             .onAppear { columnWidth = calcWidth }
             .onChange(of: geo.size.width) { _, _ in columnWidth = calcWidth }
         }
-        .frame(height: rowHeight * 4 + rowSpacing * 3 + 8)
+        .frame(height: rowHeight * 4 + rowSpacing * 3 + 4)
     }
 
     // MARK: - Rows
@@ -65,11 +67,8 @@ struct EnglishFlickKeyboardView: View {
                 Text("空白")
                     .font(.system(size: 13))
                     .frame(maxWidth: .infinity, minHeight: rowHeight)
-                    .background(KeyboardColors.key)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(FlickSpecialKeyStyle())
         }
     }
 
@@ -86,9 +85,20 @@ struct EnglishFlickKeyboardView: View {
                     flickSideButton(systemImage: "face.smiling") { onToggleEmojiPicker?() }
                     // Shift toggle button
                     Button {
-                        isShifted.toggle()
+                        HapticManager.specialKeyTap()
+                        let now = Date()
+                        if let last = lastShiftTapTime, now.timeIntervalSince(last) < 0.3 {
+                            shiftState = .capsLock
+                            lastShiftTapTime = nil
+                        } else if shiftState == .capsLock {
+                            shiftState = .off
+                            lastShiftTapTime = nil
+                        } else {
+                            shiftState = shiftState == .off ? .shift : .off
+                            lastShiftTapTime = now
+                        }
                     } label: {
-                        Text(isShifted ? "A/a" : "a/A")
+                        Text(shiftState == .capsLock ? "A" : (shiftState == .shift ? "A/a" : "a/A"))
                             .font(.system(size: 14))
                             .frame(maxWidth: .infinity, minHeight: rowHeight)
                     }
@@ -117,23 +127,20 @@ struct EnglishFlickKeyboardView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: columnWidth, height: rowHeight * 2 + rowSpacing)
-                    .background(KeyboardColors.confirm)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConfirmKeyStyle())
         }
     }
 
     // MARK: - Repeating Backspace
 
     private var flickRepeatingBackspace: some View {
-        RepeatingButton(action: onBackspace) {
+        RepeatingButton(action: onBackspace) { pressed in
             Image(systemName: "delete.left")
                 .font(.system(size: 18))
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: rowHeight)
-                .background(KeyboardColors.key)
+                .background(pressed ? KeyboardColors.keyPressed : KeyboardColors.key)
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
@@ -146,9 +153,9 @@ struct EnglishFlickKeyboardView: View {
             EnglishFlickKeyCell(
                 flickKey: key,
                 onChar: { char in
-                    let output = isShifted ? char : char.lowercased()
+                    let output = shiftState.isUppercase ? char : char.lowercased()
                     onChar(output)
-                    if isShifted { isShifted = false }
+                    if shiftState == .shift { shiftState = .off }
                 },
                 height: rowHeight
             )

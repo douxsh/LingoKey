@@ -37,6 +37,7 @@
 		E1A2B3C4D5E6F70800000001 /* EnglishFlickKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A2B3C4D5E6F70800000002 /* EnglishFlickKeyboardView.swift */; };
 		E1A2B3C4D5E6F70800000003 /* NumberFlickKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A2B3C4D5E6F70800000004 /* NumberFlickKeyboardView.swift */; };
 		D7C2F14A51D3A4DFB83B0473 /* SuggestionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */; };
+		F1A2B3C4D5E6F70800000010 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F70800000011 /* HapticManager.swift */; };
 		EAA3F222464C70F355A3BECB /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A040AFE7A6996804937838 /* KeyboardViewController.swift */; };
 		EEA696B9BA846B6DB8EFA8A7 /* KeyboardMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51639F8AD874EE417EA0A347 /* KeyboardMode.swift */; };
 		F1ADF37A78BDB45D7CA033EA /* SuggestionBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070938AC1BF83DC497E44029 /* SuggestionBarView.swift */; };
@@ -44,6 +45,7 @@
 		F3F47C47DC76C8914DFA9D2E /* LingoKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 033A8D45FE9D3759EDF69821 /* LingoKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F81D57D22EBD7DBCBD74D5A1 /* NumberSymbolKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */; };
 		F968A9E9A8A5CFEC04EEC174 /* LocalKanaKanjiConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAB5B84DB6A3B107BC4F6F3 /* LocalKanaKanjiConverter.swift */; };
+		F2A1B3C4D5E6F70800000001 /* KanaBigramPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A1B3C4D5E6F70800000002 /* KanaBigramPredictor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +90,7 @@
 		5DAB5B84DB6A3B107BC4F6F3 /* LocalKanaKanjiConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalKanaKanjiConverter.swift; sourceTree = "<group>"; };
 		63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeTabBarView.swift; sourceTree = "<group>"; };
 		675312619FDD6BC24EAB087B /* TextReplacementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextReplacementService.swift; sourceTree = "<group>"; };
+		F1A2B3C4D5E6F70800000011 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		700AF6F5A2848B1DD66E3227 /* ClaudeAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAPIService.swift; sourceTree = "<group>"; };
 		7179F95F226FD06FD0331433 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		75D0BECAAD0358F9F9690C2E /* LingoKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LingoKeyboardView.swift; sourceTree = "<group>"; };
@@ -107,6 +110,7 @@
 		C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberSymbolKeyboardView.swift; sourceTree = "<group>"; };
 		DE44AFD5A193DEF23801B445 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		DE76A5DE037167026690D0F2 /* FlickKeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickKeyMap.swift; sourceTree = "<group>"; };
+		F2A1B3C4D5E6F70800000002 /* KanaBigramPredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KanaBigramPredictor.swift; sourceTree = "<group>"; };
 		ECCF930F107042747D4B9AB4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -150,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				700AF6F5A2848B1DD66E3227 /* ClaudeAPIService.swift */,
+				F1A2B3C4D5E6F70800000011 /* HapticManager.swift */,
 				5DAB5B84DB6A3B107BC4F6F3 /* LocalKanaKanjiConverter.swift */,
 				931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */,
 				675312619FDD6BC24EAB087B /* TextReplacementService.swift */,
@@ -191,6 +196,7 @@
 				3D7447A5488D7D06CA1D2710 /* DubeolsikKeyMap.swift */,
 				DE76A5DE037167026690D0F2 /* FlickKeyMap.swift */,
 				2CF0895E9DEF32016B3BDC4A /* HangulComposer.swift */,
+				F2A1B3C4D5E6F70800000002 /* KanaBigramPredictor.swift */,
 				2E657F60C0B08CD88354E35E /* RomajiToHiraganaConverter.swift */,
 			);
 			path = InputEngine;
@@ -375,10 +381,12 @@
 				E1A2B3C4D5E6F70800000001 /* EnglishFlickKeyboardView.swift in Sources */,
 				A8557898E1DFFD4E35CBD48B /* FlickKeyMap.swift in Sources */,
 				97A080E57391AA8ADC8591A6 /* FlickKeyboardView.swift in Sources */,
+				F1A2B3C4D5E6F70800000010 /* HapticManager.swift in Sources */,
 				7CA6E24BE0A3A52FACCC8C95 /* HangulComposer.swift in Sources */,
 				720B0E2B118AD8EFA48490EB /* HangulKeyboardLayoutView.swift in Sources */,
 				70C102E357A365DCB81E1A0F /* HiraganaPreviewView.swift in Sources */,
 				9FC42237E2A370505F0D3DC8 /* KeyboardMode.swift in Sources */,
+				F2A1B3C4D5E6F70800000001 /* KanaBigramPredictor.swift in Sources */,
 				EAA3F222464C70F355A3BECB /* KeyboardViewController.swift in Sources */,
 				F3CCD51B2CE9986BED5D1E20 /* LingoKeyboardView.swift in Sources */,
 				F968A9E9A8A5CFEC04EEC174 /* LocalKanaKanjiConverter.swift in Sources */,

@@ -35,11 +35,12 @@ struct NumberFlickKeyboardView: View {
                 bottomRows
             }
             .padding(.horizontal, 5)
-            .padding(.vertical, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
             .onAppear { columnWidth = calcWidth }
             .onChange(of: geo.size.width) { _, _ in columnWidth = calcWidth }
         }
-        .frame(height: rowHeight * 4 + rowSpacing * 3 + 8)
+        .frame(height: rowHeight * 4 + rowSpacing * 3 + 4)
     }
 
     // MARK: - Rows
@@ -62,11 +63,8 @@ struct NumberFlickKeyboardView: View {
                 Text("空白")
                     .font(.system(size: 13))
                     .frame(maxWidth: .infinity, minHeight: rowHeight)
-                    .background(KeyboardColors.key)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(FlickSpecialKeyStyle())
         }
     }
 
@@ -108,23 +106,20 @@ struct NumberFlickKeyboardView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: columnWidth, height: rowHeight * 2 + rowSpacing)
-                    .background(KeyboardColors.confirm)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConfirmKeyStyle())
         }
     }
 
     // MARK: - Repeating Backspace
 
     private var flickRepeatingBackspace: some View {
-        RepeatingButton(action: onBackspace) {
+        RepeatingButton(action: onBackspace) { pressed in
             Image(systemName: "delete.left")
                 .font(.system(size: 18))
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: rowHeight)
-                .background(KeyboardColors.key)
+                .background(pressed ? KeyboardColors.keyPressed : KeyboardColors.key)
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }

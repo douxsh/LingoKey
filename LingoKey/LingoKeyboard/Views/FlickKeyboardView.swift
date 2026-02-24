@@ -26,8 +26,9 @@ struct FlickKeyboardView: View {
     var onTrackpadDeactivated: (() -> Void)? = nil
     var isTrackpadActive: Bool = false
     var hasBufferContent: Bool = false
+    var hiraganaBuffer: String = ""
 
-    private let rowHeight: CGFloat = 46
+    private let rowHeight: CGFloat = 45
     private let keySpacing: CGFloat = 6
     private let rowSpacing: CGFloat = 7
 
@@ -49,11 +50,12 @@ struct FlickKeyboardView: View {
                 bottomRows
             }
             .padding(.horizontal, 5)
-            .padding(.vertical, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
             .onAppear { columnWidth = calcWidth }
             .onChange(of: geo.size.width) { _, _ in columnWidth = calcWidth }
         }
-        .frame(height: rowHeight * 4 + rowSpacing * 3 + 8) // 4 rows + spacing + vertical padding
+        .frame(height: rowHeight * 4 + rowSpacing * 3 + 4) // 4 rows + spacing + top padding
     }
 
     // MARK: - Rows
@@ -61,7 +63,7 @@ struct FlickKeyboardView: View {
     private var row0: some View {
         HStack(spacing: keySpacing) {
             flickSideButton(systemImage: "arrow.right") { onAdvanceCursor() }
-            flickCells(for: FlickKeyMap.kanaGrid[0])
+            flickCells(for: FlickKeyMap.kanaGrid[0], gridRow: 0)
             flickRepeatingBackspace
         }
     }
@@ -69,7 +71,7 @@ struct FlickKeyboardView: View {
     private var row1: some View {
         HStack(spacing: keySpacing) {
             flickSideButton(systemImage: "arrow.counterclockwise") { onUndoKana() }
-            flickCells(for: FlickKeyMap.kanaGrid[1])
+            flickCells(for: FlickKeyMap.kanaGrid[1], gridRow: 1)
             TrackpadSpaceBar(
                 onSpace: onSpace,
                 onCursorMove: { dir in onCursorMove?(dir) },
@@ -96,26 +98,23 @@ struct FlickKeyboardView: View {
                 // Row 2: ABC | ま や ら
                 HStack(spacing: keySpacing) {
                     flickSideButton(label: "ABC") { onSwitchToRomaji() }
-                    flickCells(for: FlickKeyMap.kanaGrid[2])
+                    flickCells(for: FlickKeyMap.kanaGrid[2], gridRow: 2)
                 }
                 // Row 3: 😊 | ^^/小゛゜ わ 、。?!
                 HStack(spacing: keySpacing) {
                     flickSideButton(systemImage: "face.smiling") { onToggleEmojiPicker?() }
                     // Context-dependent: kaomoji when not composing, modifier toggle when composing
-                    Button {
-                        if isComposing {
-                            onModifierToggle()
-                        } else {
-                            onToggleEmojiPicker?()
-                        }
-                    } label: {
-                        Text(isComposing ? "小゛゜" : "^^")
-                            .font(.system(size: isComposing ? 14 : 18))
-                            .frame(maxWidth: .infinity, minHeight: rowHeight)
-                    }
-                    .buttonStyle(FlickSpecialKeyStyle())
+                    // Dynamic hit area: expand touch target when last char is modifiable
+                    ModifierKeyCell(
+                        isComposing: isComposing,
+                        isModifiable: modifierKeyExpanded,
+                        height: rowHeight,
+                        onModifierToggle: onModifierToggle,
+                        onToggleEmojiPicker: { onToggleEmojiPicker?() }
+                    )
                     // わ key (flick)
-                    FlickKeyCell(flickKey: FlickKeyMap.kanaWa, onKana: onKana, onTap: onKanaTap, height: rowHeight)
+                    FlickKeyCell(flickKey: FlickKeyMap.kanaWa, onKana: onKana, onTap: onKanaTap, height: rowHeight,
+                                 isPredicted: predictions.contains { $0.row == -1 && $0.col == 0 })
                     // 、 key (flick + repeated-tap cycling: 、→。→？→！)
                     PunctuationFlickKeyCell(flickKey: FlickKeyMap.punctuation, onKana: onKana, height: rowHeight)
                 }
@@ -129,23 +128,20 @@ struct FlickKeyboardView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: columnWidth, height: rowHeight * 2 + rowSpacing)
-                    .background(KeyboardColors.confirm)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConfirmKeyStyle())
         }
     }
 
     // MARK: - Repeating Backspace
 
     private var flickRepeatingBackspace: some View {
-        RepeatingButton(action: onBackspace) {
+        RepeatingButton(action: onBackspace) { pressed in
             Image(systemName: "delete.left")
                 .font(.system(size: 18))
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: rowHeight)
-                .background(KeyboardColors.key)
+                .background(pressed ? KeyboardColors.keyPressed : KeyboardColors.key)
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
@@ -153,9 +149,21 @@ struct FlickKeyboardView: View {
 
     // MARK: - Helpers
 
-    private func flickCells(for keys: [FlickKeyMap.FlickKey]) -> some View {
-        ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
-            FlickKeyCell(flickKey: key, onKana: onKana, onTap: onKanaTap, height: rowHeight)
+    /// Whether the modifier key (小゛゜) should have an expanded touch target.
+    private var modifierKeyExpanded: Bool {
+        KanaBigramPredictor.isModifiable(lastChar: hiraganaBuffer.last)
+    }
+
+    /// Predicted next-key grid positions based on bigram of last buffer character.
+    private var predictions: [(row: Int, col: Int)] {
+        KanaBigramPredictor.predictNextKeys(lastChar: hiraganaBuffer.last)
+    }
+
+    private func flickCells(for keys: [FlickKeyMap.FlickKey], gridRow: Int) -> some View {
+        let preds = predictions
+        return ForEach(Array(keys.enumerated()), id: \.offset) { col, key in
+            let predicted = preds.contains { $0.row == gridRow && $0.col == col }
+            FlickKeyCell(flickKey: key, onKana: onKana, onTap: onKanaTap, height: rowHeight, isPredicted: predicted)
         }
     }
 
@@ -188,11 +196,13 @@ private struct FlickKeyCell: View {
     let onKana: (String) -> Void
     var onTap: ((FlickKeyMap.FlickKey) -> Void)? = nil
     let height: CGFloat
+    var isPredicted: Bool = false
 
     @State private var activeDirection: FlickKeyMap.Direction? = nil
     @State private var isDragging = false
 
-    private let flickThreshold: CGFloat = 20
+    /// Predicted keys get a lower threshold → easier to trigger flick (more sensitive tap area).
+    private var flickThreshold: CGFloat { isPredicted ? 25 : 35 }
 
     var body: some View {
         Text(flickKey.center)
@@ -201,6 +211,10 @@ private struct FlickKeyCell: View {
             .background(isDragging ? KeyboardColors.keyPressed : KeyboardColors.key)
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            // Dynamic hit area expansion: predicted keys get larger touch target (invisible)
+            .padding(isPredicted ? -4 : 0)
+            .contentShape(Rectangle())
+            .padding(isPredicted ? 4 : 0)
             .overlay(alignment: .top) {
                 if isDragging {
                     flickPreview
@@ -289,7 +303,7 @@ private struct PunctuationFlickKeyCell: View {
     @State private var lastTapTime: Date = .distantPast
     @State private var didFlick = false
 
-    private let flickThreshold: CGFloat = 20
+    private let flickThreshold: CGFloat = 35
     private static let cycleChars = ["、", "。", "？", "！"]
     private static let cycleTimeout: TimeInterval = 1.0
 
@@ -400,6 +414,36 @@ private struct PunctuationFlickKeyCell: View {
     }
 }
 
+// MARK: - Modifier Key Cell (小゛゜) with dynamic hit area
+
+/// Modifier key that expands its invisible touch target when the last character is modifiable.
+private struct ModifierKeyCell: View {
+    let isComposing: Bool
+    let isModifiable: Bool
+    let height: CGFloat
+    let onModifierToggle: () -> Void
+    let onToggleEmojiPicker: () -> Void
+
+    var body: some View {
+        Button {
+            if isComposing {
+                onModifierToggle()
+            } else {
+                onToggleEmojiPicker()
+            }
+        } label: {
+            Text(isComposing ? "小゛゜" : "^^")
+                .font(.system(size: isComposing ? 14 : 18))
+                .frame(maxWidth: .infinity, minHeight: height)
+        }
+        .buttonStyle(FlickSpecialKeyStyle())
+        // Dynamic hit area: expand touch target when last char is modifiable
+        .padding(isModifiable ? -8 : 0)
+        .contentShape(Rectangle())
+        .padding(isModifiable ? 8 : 0)
+    }
+}
+
 // MARK: - Flick Key Style
 
 struct FlickSpecialKeyStyle: ButtonStyle {
@@ -409,5 +453,7 @@ struct FlickSpecialKeyStyle: ButtonStyle {
             .background(configuration.isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.08), value: configuration.isPressed)
     }
 }

@@ -4,14 +4,14 @@ import SwiftUI
 /// Behavior: immediate fire → 0.5s wait → 0.1s interval → accelerate to 0.05s after 20 repeats.
 struct RepeatingButton<Label: View>: View {
     let action: () -> Void
-    @ViewBuilder let label: () -> Label
+    @ViewBuilder let label: (_ isPressed: Bool) -> Label
 
     @State private var timer: Timer?
     @State private var repeatCount = 0
     @State private var isPressed = false
 
     var body: some View {
-        label()
+        label(isPressed)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in

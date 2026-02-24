@@ -104,7 +104,8 @@ struct LingoKeyboardView: View {
                 onTrackpadActivated: { lingoState.activateTrackpad() },
                 onTrackpadDeactivated: { lingoState.deactivateTrackpad() },
                 isTrackpadActive: lingoState.isTrackpadActive,
-                hasBufferContent: !lingoState.confirmedText.isEmpty || !lingoState.hiraganaBuffer.isEmpty
+                hasBufferContent: !lingoState.confirmedText.isEmpty || !lingoState.hiraganaBuffer.isEmpty,
+                hiraganaBuffer: lingoState.hiraganaBuffer
             )
         } else {
             QwertyKeyboardView(
@@ -121,6 +122,24 @@ struct LingoKeyboardView: View {
     }
 }
 
+// MARK: - Shift State
+
+enum ShiftState {
+    case off, shift, capsLock
+
+    var icon: String {
+        switch self {
+        case .off: return "shift"
+        case .shift: return "shift.fill"
+        case .capsLock: return "capslock.fill"
+        }
+    }
+
+    var isUppercase: Bool {
+        self != .off
+    }
+}
+
 // MARK: - QWERTY Keyboard
 
 struct QwertyKeyboardView: View {
@@ -133,7 +152,8 @@ struct QwertyKeyboardView: View {
     var showKanaSwitch: Bool = false
     var onSwitchToKana: (() -> Void)? = nil
 
-    @State private var isShifted = false
+    @State private var shiftState: ShiftState = .off
+    @State private var lastShiftTapTime: Date? = nil
 
     private let row1 = ["q","w","e","r","t","y","u","i","o","p"]
     private let row2 = ["a","s","d","f","g","h","j","k","l"]
@@ -161,47 +181,54 @@ struct QwertyKeyboardView: View {
                 bottomRow(keyWidth: kw, sideWidth: sideW, availableWidth: aw)
             }
             .padding(.horizontal, hPad)
-            .padding(.vertical, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
         }
-        .frame(height: keyH * 4 + rsp * 3 + 8)
+        .frame(height: keyH * 4 + rsp * 3 + 4)
     }
 
     private func letterRow(_ keys: [String], keyWidth: CGFloat) -> some View {
         HStack(spacing: ksp) {
             ForEach(keys, id: \.self) { key in
-                let display = isShifted ? key.uppercased() : key
-                Button(display) {
+                let display = shiftState.isUppercase ? key.uppercased() : key
+                QwertyKeyView(label: display, width: keyWidth, height: keyH) {
                     onChar(display)
-                    if isShifted { isShifted = false }
+                    if shiftState == .shift { shiftState = .off }
                 }
-                .buttonStyle(KeyButtonStyle())
-                .frame(width: keyWidth)
             }
         }
     }
 
     private func shiftButton(width: CGFloat) -> some View {
         Button {
-            isShifted.toggle()
+            HapticManager.specialKeyTap()
+            let now = Date()
+            if let last = lastShiftTapTime, now.timeIntervalSince(last) < 0.3 {
+                shiftState = .capsLock
+                lastShiftTapTime = nil
+            } else if shiftState == .capsLock {
+                shiftState = .off
+                lastShiftTapTime = nil
+            } else {
+                shiftState = shiftState == .off ? .shift : .off
+                lastShiftTapTime = now
+            }
         } label: {
-            Image(systemName: isShifted ? "shift.fill" : "shift")
+            Image(systemName: shiftState.icon)
                 .font(.system(size: 16))
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
-                .background(KeyboardColors.specialKey)
-                .cornerRadius(8)
-                .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SpecialKeyStyle())
     }
 
     private func backspaceBtn(width: CGFloat) -> some View {
-        RepeatingButton(action: onBackspace) {
+        RepeatingButton(action: onBackspace) { pressed in
             Image(systemName: "delete.left")
                 .font(.system(size: 16))
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
-                .background(KeyboardColors.specialKey)
+                .background(pressed ? KeyboardColors.specialKeyPressed : KeyboardColors.specialKey)
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
@@ -220,11 +247,8 @@ struct QwertyKeyboardView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(.primary)
                     .frame(width: keyWidth, height: keyH)
-                    .background(KeyboardColors.specialKey)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SpecialKeyStyle())
 
             Button {
                 onToggleEmojiPicker?()
@@ -232,33 +256,24 @@ struct QwertyKeyboardView: View {
                 Image(systemName: "face.smiling")
                     .font(.system(size: 18))
                     .frame(width: keyWidth, height: keyH)
-                    .background(KeyboardColors.specialKey)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SpecialKeyStyle())
 
             Button {
                 onSpace()
             } label: {
                 Text("")
                     .frame(width: spaceW, height: keyH)
-                    .background(KeyboardColors.key)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(KeyButtonStyle())
 
             Button(action: { onReturn() }) {
                 Image(systemName: "checkmark")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
-                    .background(KeyboardColors.confirm)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConfirmKeyStyle())
         }
     }
 }
@@ -304,6 +319,13 @@ enum KeyboardColors {
 
     /// Confirm button blue — Apple system blue #007AFF.
     static let confirm = Color(red: 0, green: 122.0/255.0, blue: 255.0/255.0)
+
+    /// Pressed state for confirm button — slightly darker blue.
+    static let confirmPressed = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(red: 0, green: 90.0/255.0, blue: 200.0/255.0, alpha: 1)
+            : UIColor(red: 0, green: 100.0/255.0, blue: 210.0/255.0, alpha: 1)
+    })
 }
 
 // MARK: - Key Styles
@@ -316,6 +338,8 @@ struct KeyButtonStyle: ButtonStyle {
             .background(configuration.isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.08), value: configuration.isPressed)
     }
 }
 
@@ -328,5 +352,62 @@ struct SpecialKeyStyle: ButtonStyle {
             .background(configuration.isPressed ? KeyboardColors.specialKeyPressed : KeyboardColors.specialKey)
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.08), value: configuration.isPressed)
+    }
+}
+
+struct ConfirmKeyStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(minHeight: 43)
+            .background(configuration.isPressed ? KeyboardColors.confirmPressed : KeyboardColors.confirm)
+            .cornerRadius(8)
+            .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.08), value: configuration.isPressed)
+    }
+}
+
+// MARK: - QWERTY Key View (with key pop bubble)
+
+struct QwertyKeyView: View {
+    let label: String
+    let width: CGFloat
+    let height: CGFloat
+    let onTap: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Text(label)
+            .font(.system(size: 22))
+            .frame(width: width, height: height)
+            .background(isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
+            .cornerRadius(8)
+            .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.08), value: isPressed)
+            .overlay(alignment: .top) {
+                if isPressed {
+                    Text(label)
+                        .font(.system(size: 32, weight: .medium))
+                        .frame(width: width + 12, height: height + 16)
+                        .background(KeyboardColors.key)
+                        .cornerRadius(10)
+                        .shadow(color: .black.opacity(0.25), radius: 4, y: -2)
+                        .offset(y: -(height + 12))
+                }
+            }
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed { isPressed = true }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        onTap()
+                    }
+            )
     }
 }

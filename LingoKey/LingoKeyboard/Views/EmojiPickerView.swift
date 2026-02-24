@@ -168,7 +168,7 @@ struct EmojiPickerView: View {
                     }
 
                     // Right: delete button (no background)
-                    RepeatingButton(action: onBackspace) {
+                    RepeatingButton(action: onBackspace) { _ in
                         Image(systemName: "delete.left")
                             .font(.system(size: 16))
                             .foregroundStyle(.primary)

@@ -4,6 +4,7 @@ struct OnboardingView: View {
     @EnvironmentObject var settings: SharedSettings
     @State private var apiKeyInput = ""
     @State private var selectedMode = KeyboardMode.enCorrection
+    @State private var selectedAutoCorrectionLevel = AutoCorrectionLevel.conservative
     @State private var currentPage = 0
 
     var body: some View {
@@ -101,11 +102,23 @@ struct OnboardingView: View {
                 .pickerStyle(.segmented)
             }
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Auto Correction")
+                    .font(.headline)
+                Picker("Auto Correction", selection: $selectedAutoCorrectionLevel) {
+                    ForEach(AutoCorrectionLevel.allCases) { level in
+                        Text(level.displayName).tag(level)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
             Spacer()
 
             Button {
                 settings.apiKey = apiKeyInput
                 settings.defaultMode = selectedMode.rawValue
+                settings.autoCorrectionLevel = selectedAutoCorrectionLevel.rawValue
                 settings.onboardingCompleted = true
             } label: {
                 Text("Get Started")
@@ -118,6 +131,11 @@ struct OnboardingView: View {
         .padding(.horizontal)
         .padding(.top)
         .padding(.bottom, 50)
+        .onAppear {
+            apiKeyInput = settings.apiKey
+            selectedMode = KeyboardMode(rawValue: settings.defaultMode) ?? .enCorrection
+            selectedAutoCorrectionLevel = AutoCorrectionLevel(rawValue: settings.autoCorrectionLevel) ?? .conservative
+        }
     }
 
     // MARK: - Helpers

@@ -8,7 +8,8 @@ struct HangulKeyboardLayoutView: View {
     let onToggleNumberKeyboard: () -> Void
     var onToggleEmojiPicker: (() -> Void)? = nil
 
-    @State private var isShifted = false
+    @State private var shiftState: ShiftState = .off
+    @State private var lastShiftTapTime: Date? = nil
 
     // Standard 2벌식 layout
     private let row1      = ["ㅂ","ㅈ","ㄷ","ㄱ","ㅅ","ㅛ","ㅕ","ㅑ","ㅐ","ㅔ"]
@@ -34,8 +35,8 @@ struct HangulKeyboardLayoutView: View {
             let sideW = (aw - kw * 7 - ksp * 8) / 2
 
             VStack(spacing: rsp) {
-                keyRow(labels: isShifted ? row1Shift : row1,
-                       keys: isShifted ? row1ShiftKeys : row1Keys,
+                keyRow(labels: shiftState.isUppercase ? row1Shift : row1,
+                       keys: shiftState.isUppercase ? row1ShiftKeys : row1Keys,
                        keyWidth: kw)
                 keyRow(labels: row2, keys: row2Keys, keyWidth: kw)
 
@@ -48,46 +49,53 @@ struct HangulKeyboardLayoutView: View {
                 bottomRow(keyWidth: kw, sideWidth: sideW, availableWidth: aw)
             }
             .padding(.horizontal, hPad)
-            .padding(.vertical, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
         }
-        .frame(height: keyH * 4 + rsp * 3 + 8)
+        .frame(height: keyH * 4 + rsp * 3 + 4)
     }
 
     private func keyRow(labels: [String], keys: [String], keyWidth: CGFloat) -> some View {
         HStack(spacing: ksp) {
             ForEach(Array(zip(labels, keys)), id: \.1) { label, key in
-                Button(label) {
+                HangulKeyView(label: label, width: keyWidth, height: keyH) {
                     onChar(key)
-                    if isShifted { isShifted = false }
+                    if shiftState == .shift { shiftState = .off }
                 }
-                .buttonStyle(KeyButtonStyle())
-                .frame(width: keyWidth)
             }
         }
     }
 
     private func shiftButton(width: CGFloat) -> some View {
         Button {
-            isShifted.toggle()
+            HapticManager.specialKeyTap()
+            let now = Date()
+            if let last = lastShiftTapTime, now.timeIntervalSince(last) < 0.3 {
+                shiftState = .capsLock
+                lastShiftTapTime = nil
+            } else if shiftState == .capsLock {
+                shiftState = .off
+                lastShiftTapTime = nil
+            } else {
+                shiftState = shiftState == .off ? .shift : .off
+                lastShiftTapTime = now
+            }
         } label: {
-            Image(systemName: isShifted ? "shift.fill" : "shift")
+            Image(systemName: shiftState.icon)
                 .font(.system(size: 16))
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
-                .background(KeyboardColors.specialKey)
-                .cornerRadius(8)
-                .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SpecialKeyStyle())
     }
 
     private func backspaceBtn(width: CGFloat) -> some View {
-        RepeatingButton(action: onBackspace) {
+        RepeatingButton(action: onBackspace) { pressed in
             Image(systemName: "delete.left")
                 .font(.system(size: 16))
                 .foregroundStyle(.primary)
                 .frame(width: width, height: keyH)
-                .background(KeyboardColors.specialKey)
+                .background(pressed ? KeyboardColors.specialKeyPressed : KeyboardColors.specialKey)
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
         }
@@ -103,11 +111,8 @@ struct HangulKeyboardLayoutView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(.primary)
                     .frame(width: keyWidth, height: keyH)
-                    .background(KeyboardColors.specialKey)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SpecialKeyStyle())
 
             Button {
                 onToggleEmojiPicker?()
@@ -115,33 +120,67 @@ struct HangulKeyboardLayoutView: View {
                 Image(systemName: "face.smiling")
                     .font(.system(size: 18))
                     .frame(width: keyWidth, height: keyH)
-                    .background(KeyboardColors.specialKey)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SpecialKeyStyle())
 
             Button {
                 onSpace()
             } label: {
                 Text("")
                     .frame(width: spaceW, height: keyH)
-                    .background(KeyboardColors.key)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(KeyButtonStyle())
 
             Button(action: { onReturn() }) {
                 Image(systemName: "checkmark")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: confirmW, height: keyH)
-                    .background(KeyboardColors.confirm)
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConfirmKeyStyle())
         }
+    }
+}
+
+// MARK: - Hangul Key View (with key pop bubble)
+
+private struct HangulKeyView: View {
+    let label: String
+    let width: CGFloat
+    let height: CGFloat
+    let onTap: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Text(label)
+            .font(.system(size: 22))
+            .frame(width: width, height: height)
+            .background(isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
+            .cornerRadius(8)
+            .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.08), value: isPressed)
+            .overlay(alignment: .top) {
+                if isPressed {
+                    Text(label)
+                        .font(.system(size: 32, weight: .medium))
+                        .frame(width: width + 12, height: height + 16)
+                        .background(KeyboardColors.key)
+                        .cornerRadius(10)
+                        .shadow(color: .black.opacity(0.25), radius: 4, y: -2)
+                        .offset(y: -(height + 12))
+                }
+            }
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed { isPressed = true }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        onTap()
+                    }
+            )
     }
 }

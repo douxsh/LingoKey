@@ -79,19 +79,25 @@ struct HiraganaPreviewView: View {
     // MARK: - Default (no cursor)
 
     private var defaultTextView: some View {
-        Group {
+        // Use a single concatenated Text so confirmed + composing flow as one continuous line
+        let result: Text = {
+            var t = Text("")
             if !confirmedText.isEmpty {
-                Text(confirmedText)
+                t = t + Text(confirmedText)
                     .font(.system(size: 16))
-                    .foregroundStyle(.primary)
+                    .foregroundColor(.primary)
             }
             if !composingText.isEmpty {
-                Text(composingText)
+                t = t + Text(composingText)
                     .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
                     .underline()
             }
-        }
+            return t
+        }()
+        return result
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: - Cursor view

@@ -6,6 +6,7 @@ enum AppGroupConstants {
     enum Keys {
         static let apiKey = "openai_api_key"
         static let defaultMode = "default_keyboard_mode"
+        static let autoCorrectionLevel = "auto_correction_level"
         static let onboardingCompleted = "onboarding_completed"
     }
 

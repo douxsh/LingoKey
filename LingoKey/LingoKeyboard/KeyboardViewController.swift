@@ -35,7 +35,20 @@ class KeyboardViewController: KeyboardInputViewController {
 
 @Observable
 final class LingoKeyboardState {
+    struct EnglishAutoCorrectionRecord {
+        let originalWord: String
+        let correctedWord: String
+        let delimiter: String
+    }
+
+    struct JapaneseAutoConversionRecord {
+        let previousConfirmedText: String
+        let originalComposing: String
+        let convertedText: String
+    }
+
     var currentMode: KeyboardMode = .enCorrection
+    var autoCorrectionLevel: AutoCorrectionLevel = .conservative
     var suggestions: [Suggestion] = []
     /// Confirmed (locked) Japanese text — already converted to kanji/katakana.
     var confirmedText: String = ""
@@ -78,6 +91,10 @@ final class LingoKeyboardState {
     @ObservationIgnored private var tapCycleTimer: Timer?
     @ObservationIgnored private let tapCycleTimeout: TimeInterval = 0.7
     @ObservationIgnored let localConverter = LocalKanaKanjiConverter()
+    @ObservationIgnored private let englishTextChecker = UITextChecker()
+    @ObservationIgnored private var pendingEnglishAutoCorrection: EnglishAutoCorrectionRecord?
+    @ObservationIgnored private var pendingJapaneseAutoConversion: JapaneseAutoConversionRecord?
+    @ObservationIgnored private let englishAutoCorrectionDelimiters: Set<String> = [".", ",", "!", "?", ";", ":"]
 
     init(controller: KeyboardViewController?) {
         self.controller = controller
@@ -87,6 +104,11 @@ final class LingoKeyboardState {
         let settings = SharedSettings()
         if let mode = KeyboardMode(rawValue: settings.defaultMode) {
             currentMode = mode
+        }
+        if let level = AutoCorrectionLevel(rawValue: settings.autoCorrectionLevel) {
+            autoCorrectionLevel = level
+        } else {
+            autoCorrectionLevel = .conservative
         }
         apiService.apiKey = settings.apiKey
     }
@@ -104,6 +126,8 @@ final class LingoKeyboardState {
         isTrackpadActive = false
         hangulComposer.reset()
         romajiConverter.reset()
+        pendingEnglishAutoCorrection = nil
+        pendingJapaneseAutoConversion = nil
     }
 
     // MARK: - Number Keyboard
@@ -117,8 +141,19 @@ final class LingoKeyboardState {
     }
 
     func handleNumberSymbolChar(_ char: String) {
+        HapticManager.keyTap()
         guard let proxy = controller?.textDocumentProxy else { return }
+        if currentMode == .enCorrection && englishAutoCorrectionDelimiters.contains(char) {
+            if applyEnglishAutoCorrectionBeforeDelimiter(proxy: proxy, delimiter: char) {
+                suggestionManager.textDidChange(proxy: proxy)
+                return
+            }
+            pendingEnglishAutoCorrection = nil
+        }
         proxy.insertText(char)
+        if currentMode == .enCorrection {
+            suggestionManager.textDidChange(proxy: proxy)
+        }
     }
 
     // MARK: - Emoji Picker
@@ -132,6 +167,7 @@ final class LingoKeyboardState {
     }
 
     func handleEmojiInput(_ emoji: String) {
+        HapticManager.keyTap()
         guard let proxy = controller?.textDocumentProxy else { return }
         proxy.insertText(emoji)
     }
@@ -164,7 +200,9 @@ final class LingoKeyboardState {
     }
 
     func handleFlickDirectChar(_ char: String) {
+        HapticManager.keyTap()
         if currentMode.isJapaneseInput {
+            pendingJapaneseAutoConversion = nil
             // In Japanese mode, route through the buffer so it stays in the preview
             if char.hasPrefix("\u{0008}") {
                 let replacement = String(char.dropFirst())
@@ -199,10 +237,12 @@ final class LingoKeyboardState {
     // MARK: - Character Input
 
     func handleCharacter(_ char: String) {
+        HapticManager.keyTap()
         guard let proxy = controller?.textDocumentProxy else { return }
 
         switch currentMode {
         case .enCorrection:
+            pendingEnglishAutoCorrection = nil
             proxy.insertText(char)
             suggestionManager.textDidChange(proxy: proxy)
 
@@ -219,6 +259,7 @@ final class LingoKeyboardState {
             suggestionManager.textDidChange(proxy: proxy)
 
         case .jpToEn, .jpToKr:
+            pendingJapaneseAutoConversion = nil
             if bufferCursorPosition != nil {
                 // When cursor is positioned mid-buffer, insert raw char
                 insertIntoBuffer(char)
@@ -237,6 +278,8 @@ final class LingoKeyboardState {
     // MARK: - Flick (Kana) Input
 
     func handleKana(_ kana: String) {
+        HapticManager.keyTap()
+        pendingJapaneseAutoConversion = nil
         confirmCurrentCycle()
         // Handle punctuation cycling: "\u{0008}" prefix means
         // "delete last char, then insert the rest" (repeated-tap replacement).
@@ -266,6 +309,7 @@ final class LingoKeyboardState {
     /// Cycles: original → small kana → dakuten → handakuten → original
     /// If no small kana: original → dakuten → handakuten → original
     func handleModifierToggle() {
+        pendingJapaneseAutoConversion = nil
         confirmCurrentCycle()
         guard !hiraganaBuffer.isEmpty else { return }
 
@@ -318,6 +362,8 @@ final class LingoKeyboardState {
 
     /// Handles repeated taps on the same flick key: た→ち→つ→て→と
     func handleKanaTap(_ key: FlickKeyMap.FlickKey) {
+        HapticManager.keyTap()
+        pendingJapaneseAutoConversion = nil
         let now = Date()
         let cycle = key.toggleCycle
         guard !cycle.isEmpty else { return }
@@ -464,11 +510,17 @@ final class LingoKeyboardState {
     // MARK: - Backspace
 
     func handleBackspace() {
+        HapticManager.specialKeyTap()
         confirmCurrentCycle()
         guard let proxy = controller?.textDocumentProxy else { return }
 
         switch currentMode {
         case .enCorrection:
+            if undoLastEnglishAutoCorrectionIfPossible(proxy: proxy) {
+                suggestionManager.textDidChange(proxy: proxy)
+                return
+            }
+            pendingEnglishAutoCorrection = nil
             proxy.deleteBackward()
             suggestionManager.textDidChange(proxy: proxy)
 
@@ -485,7 +537,9 @@ final class LingoKeyboardState {
             suggestionManager.textDidChange(proxy: proxy)
 
         case .jpToEn, .jpToKr:
-            if bufferCursorPosition != nil {
+            if undoLastJapaneseAutoConversionIfPossible() {
+                suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
+            } else if bufferCursorPosition != nil {
                 deleteFromBuffer()
                 suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
                 if confirmedText.isEmpty && hiraganaBuffer.isEmpty {
@@ -515,11 +569,19 @@ final class LingoKeyboardState {
     // MARK: - Space / Return
 
     func handleSpace() {
+        HapticManager.specialKeyTap()
         confirmCurrentCycle()
         guard let proxy = controller?.textDocumentProxy else { return }
 
         switch currentMode {
         case .enCorrection, .krCorrection:
+            if currentMode == .enCorrection {
+                if applyEnglishAutoCorrectionBeforeDelimiter(proxy: proxy, delimiter: " ") {
+                    suggestionManager.textDidChange(proxy: proxy)
+                    return
+                }
+                pendingEnglishAutoCorrection = nil
+            }
             if currentMode == .krCorrection {
                 hangulComposer.finalize().map { text in
                     proxy.insertText(text)
@@ -539,9 +601,17 @@ final class LingoKeyboardState {
     }
 
     func handleReturn() {
+        HapticManager.specialKeyTap()
         confirmCurrentCycle()
         guard let proxy = controller?.textDocumentProxy else { return }
 
+        if currentMode == .enCorrection {
+            if applyEnglishAutoCorrectionBeforeDelimiter(proxy: proxy, delimiter: "\n") {
+                suggestionManager.textDidChange(proxy: proxy)
+                return
+            }
+            pendingEnglishAutoCorrection = nil
+        }
         if currentMode == .krCorrection {
             hangulComposer.finalize().map { text in
                 proxy.insertText(text)
@@ -562,24 +632,45 @@ final class LingoKeyboardState {
         let composing = hiraganaBuffer.isEmpty ? romajiConverter.displayText : hiraganaBuffer
 
         if !composing.isEmpty {
-            // --- Composing text exists: lock as-is (no auto-conversion) ---
+            // --- Composing text exists: auto-convert first candidate if enabled ---
             romajiConverter.reset()
-            confirmedText += composing
+            let previousConfirmedText = confirmedText
+            if let autoConverted = preferredJapaneseAutoConversion(for: composing) {
+                confirmedText += autoConverted
+                pendingJapaneseAutoConversion = JapaneseAutoConversionRecord(
+                    previousConfirmedText: previousConfirmedText,
+                    originalComposing: composing,
+                    convertedText: autoConverted
+                )
+            } else {
+                confirmedText += composing
+                pendingJapaneseAutoConversion = nil
+            }
             hiraganaBuffer = ""
             suggestions = []
         } else if !confirmedText.isEmpty {
             // --- All text confirmed, no composing: translate ---
-            let textToTranslate = confirmedText
-            confirmedText = ""
-            hiraganaBuffer = ""
-            romajiConverter.reset()
-            isLoading = true
+            // If auto-translation already provided results, use them directly
+            pendingJapaneseAutoConversion = nil
+            let existingTranslations = suggestions.filter { $0.kind == .translation }
+            if !existingTranslations.isEmpty {
+                suggestions = existingTranslations
+                confirmedText = ""
+                hiraganaBuffer = ""
+                romajiConverter.reset()
+            } else {
+                let textToTranslate = confirmedText
+                confirmedText = ""
+                hiraganaBuffer = ""
+                romajiConverter.reset()
+                isLoading = true
 
-            Task {
-                let translations = await apiService.translateOnly(text: textToTranslate, mode: currentMode)
-                await MainActor.run {
-                    suggestions = translations
-                    isLoading = false
+                Task {
+                    let translations = await apiService.translateOnly(text: textToTranslate, mode: currentMode)
+                    await MainActor.run {
+                        suggestions = translations
+                        isLoading = false
+                    }
                 }
             }
         }
@@ -596,18 +687,223 @@ final class LingoKeyboardState {
             hiraganaBuffer = ""
             romajiConverter.reset()
             suggestions = []
+            pendingJapaneseAutoConversion = nil
             resetCursorToEnd()
             return
         }
 
         TextReplacementService.apply(suggestion: suggestion, to: proxy, mode: currentMode)
+        pendingEnglishAutoCorrection = nil
         suggestions = []
         if currentMode.isJapaneseInput {
             confirmedText = ""
             hiraganaBuffer = ""
             romajiConverter.reset()
+            pendingJapaneseAutoConversion = nil
         }
         resetCursorToEnd()
+    }
+
+    // MARK: - Local Auto Correction
+
+    private func applyEnglishAutoCorrectionBeforeDelimiter(
+        proxy: UITextDocumentProxy,
+        delimiter: String
+    ) -> Bool {
+        guard currentMode == .enCorrection, autoCorrectionLevel != .off else { return false }
+        guard let before = proxy.documentContextBeforeInput, !before.isEmpty else { return false }
+        guard let originalWord = extractLastEnglishWord(from: before) else { return false }
+
+        let fullRange = NSRange(location: 0, length: originalWord.utf16.count)
+        let misspelledRange = englishTextChecker.rangeOfMisspelledWord(
+            in: originalWord,
+            range: fullRange,
+            startingAt: 0,
+            wrap: false,
+            language: "en_US"
+        )
+        guard misspelledRange.location != NSNotFound else { return false }
+
+        guard let guesses = englishTextChecker.guesses(
+            forWordRange: misspelledRange,
+            in: originalWord,
+            language: "en_US"
+        ), !guesses.isEmpty else { return false }
+
+        guard let corrected = bestEnglishGuess(for: originalWord, guesses: guesses) else { return false }
+        guard corrected.caseInsensitiveCompare(originalWord) != .orderedSame else { return false }
+
+        for _ in 0..<originalWord.count {
+            proxy.deleteBackward()
+        }
+        proxy.insertText(corrected)
+        proxy.insertText(delimiter)
+
+        pendingEnglishAutoCorrection = EnglishAutoCorrectionRecord(
+            originalWord: originalWord,
+            correctedWord: corrected,
+            delimiter: delimiter
+        )
+        return true
+    }
+
+    private func undoLastEnglishAutoCorrectionIfPossible(proxy: UITextDocumentProxy) -> Bool {
+        guard let pending = pendingEnglishAutoCorrection else { return false }
+        let before = proxy.documentContextBeforeInput ?? ""
+        let expectedSuffix = pending.correctedWord + pending.delimiter
+        guard before.hasSuffix(expectedSuffix) else {
+            pendingEnglishAutoCorrection = nil
+            return false
+        }
+
+        for _ in 0..<expectedSuffix.count {
+            proxy.deleteBackward()
+        }
+        proxy.insertText(pending.originalWord)
+        pendingEnglishAutoCorrection = nil
+        return true
+    }
+
+    private func preferredJapaneseAutoConversion(for composing: String) -> String? {
+        guard autoCorrectionLevel != .off else { return nil }
+        guard composing.contains(where: \.isHiragana) else { return nil }
+
+        let currentConversions = suggestions
+            .filter { $0.kind == .conversion }
+            .map(\.text)
+        let localConversions = currentConversions.isEmpty
+            ? localConverter.convert(composing, maxResults: 1)
+            : currentConversions
+
+        guard let best = localConversions.first else { return nil }
+        guard best != composing else { return nil }
+
+        if autoCorrectionLevel == .conservative {
+            let delta = abs(best.count - composing.count)
+            guard delta <= 2 else { return nil }
+        }
+        return best
+    }
+
+    private func undoLastJapaneseAutoConversionIfPossible() -> Bool {
+        guard let pending = pendingJapaneseAutoConversion else { return false }
+        guard bufferCursorPosition == nil else { return false }
+        guard hiraganaBuffer.isEmpty else { return false }
+        guard confirmedText == pending.previousConfirmedText + pending.convertedText else {
+            pendingJapaneseAutoConversion = nil
+            return false
+        }
+
+        confirmedText = pending.previousConfirmedText
+        hiraganaBuffer = pending.originalComposing
+        pendingJapaneseAutoConversion = nil
+        return true
+    }
+
+    private func extractLastEnglishWord(from text: String) -> String? {
+        guard !text.isEmpty else { return nil }
+        var end = text.endIndex
+        while end > text.startIndex {
+            let prev = text.index(before: end)
+            if text[prev].isWhitespace {
+                end = prev
+            } else {
+                break
+            }
+        }
+        guard end > text.startIndex else { return nil }
+
+        var start = end
+        while start > text.startIndex {
+            let prev = text.index(before: start)
+            if isEnglishWordCharacter(text[prev]) {
+                start = prev
+            } else {
+                break
+            }
+        }
+
+        let word = String(text[start..<end])
+        guard word.count >= 2 else { return nil }
+        guard word.unicodeScalars.contains(where: { isEnglishLetter($0) }) else { return nil }
+        guard word.unicodeScalars.allSatisfy({ isEnglishLetter($0) || $0.value == 39 }) else { return nil }
+        return word
+    }
+
+    private func isEnglishWordCharacter(_ char: Character) -> Bool {
+        char.unicodeScalars.allSatisfy { isEnglishLetter($0) || $0.value == 39 }
+    }
+
+    private func isEnglishLetter(_ scalar: UnicodeScalar) -> Bool {
+        (65...90).contains(scalar.value) || (97...122).contains(scalar.value)
+    }
+
+    private func bestEnglishGuess(for originalWord: String, guesses: [String]) -> String? {
+        let originalLower = originalWord.lowercased()
+        let maxDistance: Int
+        switch autoCorrectionLevel {
+        case .off:
+            return nil
+        case .conservative:
+            maxDistance = 1
+        case .aggressive:
+            maxDistance = max(2, originalWord.count / 3)
+        }
+
+        let ranked = guesses
+            .filter { !$0.isEmpty }
+            .compactMap { guess -> (String, Int)? in
+                guard guess.unicodeScalars.allSatisfy({ isEnglishLetter($0) || $0.value == 39 }) else {
+                    return nil
+                }
+                let distance = editDistance(originalLower, guess.lowercased())
+                return (guess, distance)
+            }
+            .sorted { lhs, rhs in
+                if lhs.1 != rhs.1 { return lhs.1 < rhs.1 }
+                return lhs.0.count < rhs.0.count
+            }
+
+        guard let selected = ranked.first(where: { $0.1 <= maxDistance })?.0 else { return nil }
+        return normalizedGuessCase(selected, originalWord: originalWord)
+    }
+
+    private func normalizedGuessCase(_ guess: String, originalWord: String) -> String {
+        if originalWord == "i" || originalWord == "I" {
+            return "I"
+        }
+        if originalWord == originalWord.uppercased(), originalWord.count > 1 {
+            return guess.uppercased()
+        }
+        if let first = originalWord.first,
+           String(first) == String(first).uppercased(),
+           String(originalWord.dropFirst()) == String(originalWord.dropFirst()).lowercased() {
+            return guess.prefix(1).uppercased() + guess.dropFirst().lowercased()
+        }
+        return guess.lowercased()
+    }
+
+    private func editDistance(_ lhs: String, _ rhs: String) -> Int {
+        let lhsChars = Array(lhs)
+        let rhsChars = Array(rhs)
+        if lhsChars.isEmpty { return rhsChars.count }
+        if rhsChars.isEmpty { return lhsChars.count }
+
+        var previous = Array(0...rhsChars.count)
+        for (i, lch) in lhsChars.enumerated() {
+            var current = Array(repeating: 0, count: rhsChars.count + 1)
+            current[0] = i + 1
+            for (j, rch) in rhsChars.enumerated() {
+                let cost = lch == rch ? 0 : 1
+                current[j + 1] = min(
+                    previous[j + 1] + 1,
+                    current[j] + 1,
+                    previous[j] + cost
+                )
+            }
+            previous = current
+        }
+        return previous[rhsChars.count]
     }
 
     var textDocumentProxy: UITextDocumentProxy? {

@@ -5,8 +5,6 @@ struct SuggestionBarView: View {
     let isLoading: Bool
     let onTap: (Suggestion) -> Void
 
-    @State private var isExpanded = false
-
     private var conversions: [Suggestion] {
         suggestions.filter { $0.kind == .conversion }
     }
@@ -18,17 +16,7 @@ struct SuggestionBarView: View {
     var body: some View {
         if suggestions.isEmpty && !isLoading {
             EmptyView()
-        } else if isExpanded {
-            expandedView
         } else {
-            compactBar
-        }
-    }
-
-    // MARK: - Compact bar (Apple native style)
-
-    private var compactBar: some View {
-        HStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 0) {
                     if isLoading {
@@ -57,82 +45,7 @@ struct SuggestionBarView: View {
                 }
                 .padding(.horizontal, 4)
             }
-
-            // Chevron button to expand
-            if !suggestions.isEmpty {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isExpanded = true
-                    }
-                } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 32, height: 36)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .frame(height: 36)
-    }
-
-    // MARK: - Expanded grid view
-
-    private var expandedView: some View {
-        VStack(spacing: 0) {
-            // Top row with collapse chevron
-            HStack(spacing: 0) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 0) {
-                        ForEach(Array(conversions.prefix(5).enumerated()), id: \.element.id) { index, suggestion in
-                            if index > 0 {
-                                separator
-                            }
-                            candidateButton(suggestion)
-                        }
-                    }
-                    .padding(.horizontal, 4)
-                }
-
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isExpanded = false
-                    }
-                } label: {
-                    Image(systemName: "chevron.up")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 32, height: 36)
-                }
-                .buttonStyle(.plain)
-            }
             .frame(height: 36)
-
-            // Grid of remaining candidates
-            let allCandidates = conversions + translations
-            let remaining = Array(allCandidates.dropFirst(5))
-            if !remaining.isEmpty {
-                let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 6)
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 4) {
-                        ForEach(remaining) { suggestion in
-                            Button {
-                                onTap(suggestion)
-                            } label: {
-                                Text(suggestion.text)
-                                    .font(.system(size: 16))
-                                    .foregroundStyle(.primary)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 6)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 4)
-                }
-                .frame(maxHeight: 160)
-            }
         }
     }
 

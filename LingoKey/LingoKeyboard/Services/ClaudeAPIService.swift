@@ -5,7 +5,7 @@ final class LLMAPIService {
 
     private let endpoint = URL(string: "https://api.openai.com/v1/chat/completions")!
     private let model = "gpt-4.1-nano"
-    private let maxTokens = 256
+    private let maxTokens = 512
     private let session: URLSession
 
     init() {
@@ -43,7 +43,9 @@ final class LLMAPIService {
         let system = """
         You are a Japanese-to-\(targetLanguage) translator for a chat keyboard. \
         The user will send Japanese text (may contain hiragana, kanji, katakana, or a mix). \
+        Translate the ENTIRE text as a whole — do NOT omit or skip any sentences. \
         Return a JSON array of 1-3 natural \(targetLanguage) translations suitable for casual chat. \
+        Each translation must cover the full input text, not just part of it. \
         Only return the JSON array, no explanation. Example: ["How are you?", "How's it going?"]
         """
 

@@ -4,6 +4,7 @@ import UIKit
 final class SuggestionManager {
     private weak var state: LingoKeyboardState?
     private var debounceTask: Task<Void, Never>?
+    private var translationTask: Task<Void, Never>?
 
     private let sentenceBoundaries: Set<Character> = [".", "!", "?", "\u{3002}", "\u{FF01}", "\u{FF1F}", "\n"]
 
@@ -13,6 +14,7 @@ final class SuggestionManager {
 
     func hiraganaBufferDidChange(buffer: String) {
         debounceTask?.cancel()
+        translationTask?.cancel()
 
         guard let state = state else { return }
         let mode = state.currentMode
@@ -24,28 +26,64 @@ final class SuggestionManager {
             return
         }
 
-        // Local kana-kanji conversion: fast, no API needed.
-        // Short debounce just to avoid converting on every keystroke.
+        // Stage 1: Local kana-kanji conversion (150ms debounce)
         debounceTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(0.3 * 1_000_000_000))
+            try? await Task.sleep(nanoseconds: UInt64(0.15 * 1_000_000_000))
             guard !Task.isCancelled else { return }
 
             guard let self = self, let state = self.state else { return }
 
             let candidates = state.localConverter.convert(buffer)
-            let suggestions = candidates.map {
+            let conversionSuggestions = candidates.map {
                 Suggestion(text: $0, originalText: buffer, kind: .conversion)
             }
 
             guard !Task.isCancelled else { return }
             await MainActor.run {
-                state.suggestions = suggestions
+                // Keep existing translation suggestions, replace only conversion ones
+                let existingTranslations = state.suggestions.filter { $0.kind == .translation }
+                state.suggestions = conversionSuggestions + existingTranslations
+            }
+
+            // Stage 2: API translation (800ms debounce from original keystroke)
+            // Wait an additional 650ms after conversion completes (total ~800ms from keystroke)
+            self.startTranslationTask(buffer: buffer)
+        }
+    }
+
+    private func startTranslationTask(buffer: String) {
+        translationTask?.cancel()
+        translationTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(0.65 * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+
+            guard let self = self, let state = self.state else { return }
+
+            // Build full text: confirmedText (already converted) + current composing part
+            let confirmed = await MainActor.run { state.confirmedText }
+            let conversionSuggestions = await MainActor.run { state.suggestions.filter { $0.kind == .conversion } }
+            let composingPart: String
+            if let firstConversion = conversionSuggestions.first {
+                composingPart = firstConversion.text
+            } else {
+                composingPart = buffer
+            }
+            let textToTranslate = confirmed + composingPart
+
+            let translations = await state.apiService.translateOnly(text: textToTranslate, mode: state.currentMode)
+
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                // Keep conversion suggestions, replace translation ones
+                let currentConversions = state.suggestions.filter { $0.kind == .conversion }
+                state.suggestions = currentConversions + translations
             }
         }
     }
 
     func textDidChange(proxy: UITextDocumentProxy) {
         debounceTask?.cancel()
+        translationTask?.cancel()
 
         guard let state = state else { return }
         let mode = state.currentMode
@@ -54,7 +92,7 @@ final class SuggestionManager {
         guard !mode.isJapaneseInput else { return }
 
         let text = currentSentence(from: proxy)
-        let minLength = mode == .enCorrection ? 5 : 2
+        let minLength = mode == .enCorrection ? 3 : 2
 
         guard text.count >= minLength else {
             state.suggestions = []
@@ -94,9 +132,9 @@ final class SuggestionManager {
     }
 
     private func debounceDelay(for text: String) -> Double {
-        guard let last = text.last else { return 0.8 }
+        guard let last = text.last else { return 0.5 }
         if sentenceBoundaries.contains(last) { return 0.0 }
         if last == " " { return 0.2 }
-        return 0.8
+        return 0.5
     }
 }
