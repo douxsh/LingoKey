@@ -1,51 +1,40 @@
 import SwiftUI
 
-/// Japanese flick keyboard matching Apple's native layout:
+/// English ABC flick keyboard matching Apple's native layout:
 ///
 /// ```
-/// [→]   [あ]    [か]    [さ]    [⌫]
-/// [↩]   [た]    [な]    [は]    [空白]
-/// [ABC] [ま]    [や]    [ら]    ┌──────┐
-/// [😊]  [^^/小゛゜] [わ] [、。?!] │  →   │
+/// [→]    [@#/&_] [ABC]  [DEF]   [⌫]
+/// [↩]    [GHI]   [JKL]  [MNO]   [空白]
+/// [☆123] [PQRS]  [TUV]  [WXYZ]  ┌──────┐
+/// [😊]   [a/A]   ['"()] [.,?!]  │  →   │
 ///                                └──────┘
 /// ```
-struct FlickKeyboardView: View {
-    let onKana: (String) -> Void
-    let onKanaTap: (FlickKeyMap.FlickKey) -> Void
-    let onModifierToggle: () -> Void
+struct EnglishFlickKeyboardView: View {
+    let onChar: (String) -> Void
     let onBackspace: () -> Void
     let onSpace: () -> Void
     let onReturn: () -> Void
-    let onSwitchToRomaji: () -> Void
-    let onAdvanceCursor: () -> Void
-    let onUndoKana: () -> Void
+    let onSwitchToNumberFlick: () -> Void
+    let onSwitchToKana: () -> Void
     var onToggleEmojiPicker: (() -> Void)? = nil
-    var isComposing: Bool = false
-    var onCursorMove: ((LingoKeyboardState.CursorDirection) -> Void)? = nil
-    var onTrackpadActivated: (() -> Void)? = nil
-    var onTrackpadDeactivated: (() -> Void)? = nil
-    var isTrackpadActive: Bool = false
-    var hasBufferContent: Bool = false
+
+    @State private var isShifted = false
 
     private let rowHeight: CGFloat = 46
     private let keySpacing: CGFloat = 6
     private let rowSpacing: CGFloat = 7
 
-    /// Width of a single column, calculated from available space
     @State private var columnWidth: CGFloat = 0
 
     var body: some View {
         GeometryReader { geo in
-            let totalWidth = geo.size.width - 10 // subtract horizontal padding
+            let totalWidth = geo.size.width - 10
             let cols: CGFloat = 5
             let calcWidth = (totalWidth - keySpacing * (cols - 1)) / cols
 
             VStack(spacing: rowSpacing) {
-                // Row 0: 数字 | あ か さ | ⌫
                 row0
-                // Row 1: ABC | た な は | 空白
                 row1
-                // Rows 2-3: left 4 columns + tall 確定 button on right
                 bottomRows
             }
             .padding(.horizontal, 5)
@@ -53,75 +42,74 @@ struct FlickKeyboardView: View {
             .onAppear { columnWidth = calcWidth }
             .onChange(of: geo.size.width) { _, _ in columnWidth = calcWidth }
         }
-        .frame(height: rowHeight * 4 + rowSpacing * 3 + 8) // 4 rows + spacing + vertical padding
+        .frame(height: rowHeight * 4 + rowSpacing * 3 + 8)
     }
 
     // MARK: - Rows
 
     private var row0: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(systemImage: "arrow.right") { onAdvanceCursor() }
-            flickCells(for: FlickKeyMap.kanaGrid[0])
+            flickSideButton(systemImage: "arrow.right") { /* advance cursor - no-op for English */ }
+            flickCells(for: FlickKeyMap.englishGrid[0])
             flickRepeatingBackspace
         }
     }
 
     private var row1: some View {
         HStack(spacing: keySpacing) {
-            flickSideButton(systemImage: "arrow.counterclockwise") { onUndoKana() }
-            flickCells(for: FlickKeyMap.kanaGrid[1])
-            TrackpadSpaceBar(
-                onSpace: onSpace,
-                onCursorMove: { dir in onCursorMove?(dir) },
-                onTrackpadActivated: { onTrackpadActivated?() },
-                onTrackpadDeactivated: { onTrackpadDeactivated?() },
-                hasBufferContent: hasBufferContent,
-                isTrackpadActive: isTrackpadActive
-            ) {
-                Text(isTrackpadActive ? "◀▶" : "空白")
+            flickSideButton(systemImage: "arrow.counterclockwise") { /* undo - no-op for English */ }
+            flickCells(for: FlickKeyMap.englishGrid[1])
+            Button {
+                onSpace()
+            } label: {
+                Text("空白")
                     .font(.system(size: 13))
                     .frame(maxWidth: .infinity, minHeight: rowHeight)
-                    .background(isTrackpadActive ? KeyboardColors.keyPressed : KeyboardColors.key)
+                    .background(KeyboardColors.key)
                     .cornerRadius(8)
                     .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
             }
+            .buttonStyle(.plain)
         }
     }
 
-    /// Rows 2-3 combined: 5 columns, with 確定 button spanning 2 rows in column 5
     private var bottomRows: some View {
         HStack(spacing: keySpacing) {
-            // Columns 1-4: two rows stacked
             VStack(spacing: rowSpacing) {
-                // Row 2: ABC | ま や ら
+                // Row 2: ☆123 | PQRS TUV WXYZ
                 HStack(spacing: keySpacing) {
-                    flickSideButton(label: "ABC") { onSwitchToRomaji() }
-                    flickCells(for: FlickKeyMap.kanaGrid[2])
+                    flickSideButton(label: "☆123", fontSize: 11) { onSwitchToNumberFlick() }
+                    flickCells(for: FlickKeyMap.englishGrid[2])
                 }
-                // Row 3: 😊 | ^^/小゛゜ わ 、。?!
+                // Row 3: 😊 | a/A | '"() | .,?!
                 HStack(spacing: keySpacing) {
                     flickSideButton(systemImage: "face.smiling") { onToggleEmojiPicker?() }
-                    // Context-dependent: kaomoji when not composing, modifier toggle when composing
+                    // Shift toggle button
                     Button {
-                        if isComposing {
-                            onModifierToggle()
-                        } else {
-                            onToggleEmojiPicker?()
-                        }
+                        isShifted.toggle()
                     } label: {
-                        Text(isComposing ? "小゛゜" : "^^")
-                            .font(.system(size: isComposing ? 14 : 18))
+                        Text(isShifted ? "A/a" : "a/A")
+                            .font(.system(size: 14))
                             .frame(maxWidth: .infinity, minHeight: rowHeight)
                     }
                     .buttonStyle(FlickSpecialKeyStyle())
-                    // わ key (flick)
-                    FlickKeyCell(flickKey: FlickKeyMap.kanaWa, onKana: onKana, onTap: onKanaTap, height: rowHeight)
-                    // 、 key (flick + repeated-tap cycling: 、→。→？→！)
-                    PunctuationFlickKeyCell(flickKey: FlickKeyMap.punctuation, onKana: onKana, height: rowHeight)
+                    // Quote/Paren key
+                    EnglishFlickKeyCell(
+                        flickKey: FlickKeyMap.englishQuote,
+                        onChar: onChar,
+                        height: rowHeight
+                    )
+                    // Punctuation key with cycling
+                    PunctuationFlickKeyCellGeneric(
+                        flickKey: FlickKeyMap.englishPunctuation,
+                        onChar: onChar,
+                        height: rowHeight,
+                        cycleChars: [".", ",", "?", "!"]
+                    )
                 }
             }
 
-            // Column 5: tall confirm button spanning 2 rows, same width as one column
+            // Column 5: tall confirm button
             Button {
                 onReturn()
             } label: {
@@ -155,7 +143,15 @@ struct FlickKeyboardView: View {
 
     private func flickCells(for keys: [FlickKeyMap.FlickKey]) -> some View {
         ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
-            FlickKeyCell(flickKey: key, onKana: onKana, onTap: onKanaTap, height: rowHeight)
+            EnglishFlickKeyCell(
+                flickKey: key,
+                onChar: { char in
+                    let output = isShifted ? char : char.lowercased()
+                    onChar(output)
+                    if isShifted { isShifted = false }
+                },
+                height: rowHeight
+            )
         }
     }
 
@@ -181,12 +177,11 @@ struct FlickKeyboardView: View {
     }
 }
 
-// MARK: - Flick Key Cell
+// MARK: - English Flick Key Cell
 
-private struct FlickKeyCell: View {
+private struct EnglishFlickKeyCell: View {
     let flickKey: FlickKeyMap.FlickKey
-    let onKana: (String) -> Void
-    var onTap: ((FlickKeyMap.FlickKey) -> Void)? = nil
+    let onChar: (String) -> Void
     let height: CGFloat
 
     @State private var activeDirection: FlickKeyMap.Direction? = nil
@@ -194,9 +189,16 @@ private struct FlickKeyCell: View {
 
     private let flickThreshold: CGFloat = 20
 
+    /// Display label: shows all non-empty characters
+    private var displayLabel: String {
+        let chars = [flickKey.center, flickKey.left, flickKey.up, flickKey.right, flickKey.down]
+            .filter { !$0.isEmpty }
+        return chars.joined()
+    }
+
     var body: some View {
-        Text(flickKey.center)
-            .font(.system(size: 22))
+        Text(displayLabel)
+            .font(.system(size: displayLabel.count > 3 ? 16 : 20))
             .frame(maxWidth: .infinity, minHeight: height)
             .background(isDragging ? KeyboardColors.keyPressed : KeyboardColors.key)
             .cornerRadius(8)
@@ -216,12 +218,9 @@ private struct FlickKeyCell: View {
                     }
                     .onEnded { value in
                         let dir = direction(from: value.translation)
-                        if dir == .center, let onTap {
-                            // Tap (no swipe) → toggle cycling (た→ち→つ→て→と)
-                            onTap(flickKey)
-                        } else {
-                            // Flick (swipe) → direct character input
-                            onKana(flickKey.kana(for: dir))
+                        let char = flickKey.kana(for: dir)
+                        if !char.isEmpty {
+                            onChar(char)
                         }
                         isDragging = false
                         activeDirection = nil
@@ -239,8 +238,6 @@ private struct FlickKeyCell: View {
             return dy < 0 ? .up : .down
         }
     }
-
-    // MARK: - Cross-shaped Preview Popup
 
     private var flickPreview: some View {
         let highlight = activeDirection ?? .center
@@ -274,27 +271,30 @@ private struct FlickKeyCell: View {
     }
 }
 
-// MARK: - Punctuation Flick Key Cell (with repeated-tap cycling)
+// MARK: - Generic Punctuation Flick Key Cell (with repeated-tap cycling)
 
-/// Like FlickKeyCell but adds Apple-style repeated-tap cycling: 、→。→？→！→、…
-/// Flick (drag) still works for directional input.
-private struct PunctuationFlickKeyCell: View {
+struct PunctuationFlickKeyCellGeneric: View {
     let flickKey: FlickKeyMap.FlickKey
-    let onKana: (String) -> Void
+    let onChar: (String) -> Void
     let height: CGFloat
+    let cycleChars: [String]
 
     @State private var activeDirection: FlickKeyMap.Direction? = nil
     @State private var isDragging = false
     @State private var cycleIndex: Int = 0
     @State private var lastTapTime: Date = .distantPast
-    @State private var didFlick = false
 
     private let flickThreshold: CGFloat = 20
-    private static let cycleChars = ["、", "。", "？", "！"]
-    private static let cycleTimeout: TimeInterval = 1.0
+    private let cycleTimeout: TimeInterval = 1.0
+
+    private var displayLabel: String {
+        let chars = [flickKey.center, flickKey.left, flickKey.up, flickKey.right, flickKey.down]
+            .filter { !$0.isEmpty }
+        return chars.joined()
+    }
 
     var body: some View {
-        Text("、。?!")
+        Text(displayLabel)
             .font(.system(size: 16))
             .frame(maxWidth: .infinity, minHeight: height)
             .background(isDragging ? KeyboardColors.keyPressed : KeyboardColors.key)
@@ -313,23 +313,17 @@ private struct PunctuationFlickKeyCell: View {
                         isDragging = true
                         let dir = direction(from: value.translation)
                         activeDirection = dir
-                        didFlick = dir != .center
                     }
                     .onEnded { value in
                         let dir = direction(from: value.translation)
-
                         if dir != .center {
-                            // Flick → emit directional character
-                            onKana(flickKey.kana(for: dir))
+                            onChar(flickKey.kana(for: dir))
                             resetCycle()
                         } else {
-                            // Center tap → cycling behavior
                             handleCycleTap()
                         }
-
                         isDragging = false
                         activeDirection = nil
-                        didFlick = false
                     }
             )
     }
@@ -338,17 +332,13 @@ private struct PunctuationFlickKeyCell: View {
         let now = Date()
         let elapsed = now.timeIntervalSince(lastTapTime)
 
-        if elapsed < Self.cycleTimeout {
-            // Rapid tap → cycle to next punctuation
-            cycleIndex = (cycleIndex + 1) % Self.cycleChars.count
-            // Signal replacement: delete previous char, then insert new one
-            onKana("\u{0008}" + Self.cycleChars[cycleIndex])
+        if elapsed < cycleTimeout {
+            cycleIndex = (cycleIndex + 1) % cycleChars.count
+            onChar("\u{0008}" + cycleChars[cycleIndex])
         } else {
-            // Fresh tap → start cycle from 、
             cycleIndex = 0
-            onKana(Self.cycleChars[0])
+            onChar(cycleChars[0])
         }
-
         lastTapTime = now
     }
 
@@ -397,17 +387,5 @@ private struct PunctuationFlickKeyCell: View {
             .background(active ? Color.accentColor : Color.clear)
             .foregroundStyle(active ? .white : .primary)
             .cornerRadius(4)
-    }
-}
-
-// MARK: - Flick Key Style
-
-struct FlickSpecialKeyStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundStyle(.primary)
-            .background(configuration.isPressed ? KeyboardColors.keyPressed : KeyboardColors.key)
-            .cornerRadius(8)
-            .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
     }
 }

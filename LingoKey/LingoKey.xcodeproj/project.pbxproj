@@ -34,6 +34,8 @@
 		C82E21E1679D6DC0CC598688 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19BCA77AD52496DAFB398AE1 /* Assets.xcassets */; };
 		CC2CD13375E6C63B991B3540 /* DubeolsikKeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7447A5488D7D06CA1D2710 /* DubeolsikKeyMap.swift */; };
 		D68D6D798F9BF805C9B99246 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE584C7837C5E8FFD53B0300 /* EmojiPickerView.swift */; };
+		E1A2B3C4D5E6F70800000001 /* EnglishFlickKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A2B3C4D5E6F70800000002 /* EnglishFlickKeyboardView.swift */; };
+		E1A2B3C4D5E6F70800000003 /* NumberFlickKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A2B3C4D5E6F70800000004 /* NumberFlickKeyboardView.swift */; };
 		D7C2F14A51D3A4DFB83B0473 /* SuggestionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931E4458AB20AC57162CF6F7 /* SuggestionManager.swift */; };
 		EAA3F222464C70F355A3BECB /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A040AFE7A6996804937838 /* KeyboardViewController.swift */; };
 		EEA696B9BA846B6DB8EFA8A7 /* KeyboardMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51639F8AD874EE417EA0A347 /* KeyboardMode.swift */; };
@@ -97,6 +99,8 @@
 		A6942B0C220C4D66470B5182 /* HiraganaPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiraganaPreviewView.swift; sourceTree = "<group>"; };
 		AACD62992465F912F3784F4C /* Suggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Suggestion.swift; sourceTree = "<group>"; };
 		AE584C7837C5E8FFD53B0300 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
+		E1A2B3C4D5E6F70800000002 /* EnglishFlickKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnglishFlickKeyboardView.swift; sourceTree = "<group>"; };
+		E1A2B3C4D5E6F70800000004 /* NumberFlickKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberFlickKeyboardView.swift; sourceTree = "<group>"; };
 		B0168AE010415CA5DEC95989 /* LingoKey.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LingoKey.entitlements; sourceTree = "<group>"; };
 		B5322EDBA744A30BC9E36413 /* ClaudeAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAPIModels.swift; sourceTree = "<group>"; };
 		C0B144ADC82DF1D8BC58BC7D /* FlickKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickKeyboardView.swift; sourceTree = "<group>"; };
@@ -207,11 +211,13 @@
 			isa = PBXGroup;
 			children = (
 				AE584C7837C5E8FFD53B0300 /* EmojiPickerView.swift */,
+				E1A2B3C4D5E6F70800000002 /* EnglishFlickKeyboardView.swift */,
 				C0B144ADC82DF1D8BC58BC7D /* FlickKeyboardView.swift */,
 				8F3F71348AA5E6B46D2BEEF8 /* HangulKeyboardLayoutView.swift */,
 				A6942B0C220C4D66470B5182 /* HiraganaPreviewView.swift */,
 				75D0BECAAD0358F9F9690C2E /* LingoKeyboardView.swift */,
 				63A68EA4B1F7443714A53CDB /* ModeTabBarView.swift */,
+				E1A2B3C4D5E6F70800000004 /* NumberFlickKeyboardView.swift */,
 				C36F5007839D64EFF0E4E6EA /* NumberSymbolKeyboardView.swift */,
 				8B1D10201DAD889D2731E252 /* RepeatingButton.swift */,
 				A1B2C3D4E5F6A7B80000000A /* TrackpadSpaceBar.swift */,
@@ -366,6 +372,7 @@
 				98E3A2D7E7901E828B78AEE3 /* ClaudeAPIService.swift in Sources */,
 				CC2CD13375E6C63B991B3540 /* DubeolsikKeyMap.swift in Sources */,
 				D68D6D798F9BF805C9B99246 /* EmojiPickerView.swift in Sources */,
+				E1A2B3C4D5E6F70800000001 /* EnglishFlickKeyboardView.swift in Sources */,
 				A8557898E1DFFD4E35CBD48B /* FlickKeyMap.swift in Sources */,
 				97A080E57391AA8ADC8591A6 /* FlickKeyboardView.swift in Sources */,
 				7CA6E24BE0A3A52FACCC8C95 /* HangulComposer.swift in Sources */,
@@ -376,6 +383,7 @@
 				F3CCD51B2CE9986BED5D1E20 /* LingoKeyboardView.swift in Sources */,
 				F968A9E9A8A5CFEC04EEC174 /* LocalKanaKanjiConverter.swift in Sources */,
 				0FEE264D4AB8F9AB16351F16 /* ModeTabBarView.swift in Sources */,
+				E1A2B3C4D5E6F70800000003 /* NumberFlickKeyboardView.swift in Sources */,
 				F81D57D22EBD7DBCBD74D5A1 /* NumberSymbolKeyboardView.swift in Sources */,
 				972F81B174C75D0CA1EAAC0A /* RepeatingButton.swift in Sources */,
 				86D8B47E3D38FD86C0F2D91F /* RomajiToHiraganaConverter.swift in Sources */,

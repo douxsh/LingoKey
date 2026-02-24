@@ -21,7 +21,10 @@ struct LingoKeyboardView: View {
                     confirmedText: lingoState.confirmedText,
                     composingText: lingoState.hiraganaBuffer,
                     cursorPosition: lingoState.bufferCursorPosition,
-                    isTrackpadActive: lingoState.isTrackpadActive
+                    isTrackpadActive: lingoState.isTrackpadActive,
+                    onCursorMove: { lingoState.moveBufferCursor(direction: $0) },
+                    onTrackpadActivated: { lingoState.activateTrackpad() },
+                    onTrackpadDeactivated: { lingoState.deactivateTrackpad() }
                 )
             }
 
@@ -65,6 +68,25 @@ struct LingoKeyboardView: View {
                 onToggleNumberKeyboard: { lingoState.toggleNumberKeyboard() },
                 onToggleEmojiPicker: { lingoState.toggleEmojiPicker() }
             )
+        } else if lingoState.currentMode.isJapaneseInput && !lingoState.useRomajiInput && lingoState.flickSubKeyboard == .english {
+            EnglishFlickKeyboardView(
+                onChar: { lingoState.handleFlickDirectChar($0) },
+                onBackspace: { lingoState.handleBackspace() },
+                onSpace: { lingoState.handleSpace() },
+                onReturn: { lingoState.handleReturn() },
+                onSwitchToNumberFlick: { lingoState.switchToNumberFlick() },
+                onSwitchToKana: { lingoState.switchToKanaFlick() },
+                onToggleEmojiPicker: { lingoState.toggleEmojiPicker() }
+            )
+        } else if lingoState.currentMode.isJapaneseInput && !lingoState.useRomajiInput && lingoState.flickSubKeyboard == .number {
+            NumberFlickKeyboardView(
+                onChar: { lingoState.handleFlickDirectChar($0) },
+                onBackspace: { lingoState.handleBackspace() },
+                onSpace: { lingoState.handleSpace() },
+                onReturn: { lingoState.handleReturn() },
+                onSwitchToKana: { lingoState.switchToKanaFlick() },
+                onToggleEmojiPicker: { lingoState.toggleEmojiPicker() }
+            )
         } else if lingoState.currentMode.isJapaneseInput && !lingoState.useRomajiInput {
             FlickKeyboardView(
                 onKana: { lingoState.handleKana($0) },
@@ -73,7 +95,7 @@ struct LingoKeyboardView: View {
                 onBackspace: { lingoState.handleBackspace() },
                 onSpace: { lingoState.handleSpace() },
                 onReturn: { lingoState.handleReturn() },
-                onSwitchToRomaji: { lingoState.switchToRomajiInput() },
+                onSwitchToRomaji: { lingoState.switchToEnglishFlick() },
                 onAdvanceCursor: { lingoState.handleAdvanceCursor() },
                 onUndoKana: { lingoState.handleUndoKana() },
                 onToggleEmojiPicker: { lingoState.toggleEmojiPicker() },

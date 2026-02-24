@@ -63,6 +63,62 @@ enum FlickKeyMap {
     static let kanaWa = FlickKey(center: "わ", left: "を", up: "ん", right: "ー", down: "〜")
     static let punctuation = FlickKey(center: "、", left: "。", up: "？", right: "！", down: "")
 
+    // MARK: - English ABC Flick Grid (3 columns × 4 rows, matching Apple native)
+
+    static let englishGrid: [[FlickKey]] = [
+        // Row 0: @#/&_ | ABC | DEF
+        [
+            FlickKey(center: "@", left: "#", up: "/", right: "&", down: "_"),
+            FlickKey(center: "A", left: "B", up: "C", right: "", down: ""),
+            FlickKey(center: "D", left: "E", up: "F", right: "", down: ""),
+        ],
+        // Row 1: GHI | JKL | MNO
+        [
+            FlickKey(center: "G", left: "H", up: "I", right: "", down: ""),
+            FlickKey(center: "J", left: "K", up: "L", right: "", down: ""),
+            FlickKey(center: "M", left: "N", up: "O", right: "", down: ""),
+        ],
+        // Row 2: PQRS | TUV | WXYZ
+        [
+            FlickKey(center: "P", left: "Q", up: "R", right: "S", down: ""),
+            FlickKey(center: "T", left: "U", up: "V", right: "", down: ""),
+            FlickKey(center: "W", left: "X", up: "Y", right: "Z", down: ""),
+        ],
+    ]
+
+    // Bottom row special keys for English flick
+    static let englishShift = FlickKey(center: "a/A", left: "", up: "", right: "", down: "")
+    static let englishQuote = FlickKey(center: "'", left: "\"", up: "(", right: ")", down: "")
+    static let englishPunctuation = FlickKey(center: ".", left: ",", up: "?", right: "!", down: "")
+
+    // MARK: - Number/Symbol Flick Grid (3 columns × 4 rows, matching Apple native)
+
+    static let numberGrid: [[FlickKey]] = [
+        // Row 0: 1 | 2 | 3
+        [
+            FlickKey(center: "1", left: "☆", up: "♪", right: "→", down: ""),
+            FlickKey(center: "2", left: "¥", up: "$", right: "€", down: ""),
+            FlickKey(center: "3", left: "%", up: "°", right: "#", down: ""),
+        ],
+        // Row 1: 4 | 5 | 6
+        [
+            FlickKey(center: "4", left: "○", up: "＊", right: "・", down: ""),
+            FlickKey(center: "5", left: "+", up: "×", right: "÷", down: ""),
+            FlickKey(center: "6", left: "<", up: "=", right: ">", down: ""),
+        ],
+        // Row 2: 7 | 8 | 9
+        [
+            FlickKey(center: "7", left: "「", up: "」", right: ":", down: ""),
+            FlickKey(center: "8", left: "〒", up: "々", right: "〆", down: ""),
+            FlickKey(center: "9", left: "^", up: "|", right: "\\", down: ""),
+        ],
+    ]
+
+    // Bottom row special keys for Number flick
+    static let numberParens = FlickKey(center: "(", left: ")", up: "[", right: "]", down: "")
+    static let numberZero = FlickKey(center: "0", left: "〜", up: "…", right: "", down: "")
+    static let numberPunctuation = FlickKey(center: ".", left: ",", up: "-", right: "/", down: "")
+
     // MARK: - Dakuten (濁点) Forward Map
 
     static let dakutenForward: [Character: Character] = [

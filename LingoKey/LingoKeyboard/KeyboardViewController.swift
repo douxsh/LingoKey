@@ -46,6 +46,10 @@ final class LingoKeyboardState {
     var showEmojiPicker: Bool = false
     var useRomajiInput: Bool = false
 
+    /// Sub-keyboard state for flick mode switching: kana → english → number
+    enum FlickSubKeyboard { case kana, english, number }
+    var flickSubKeyboard: FlickSubKeyboard = .kana
+
     // MARK: - Trackpad Cursor
     /// Cursor position within `confirmedText + hiraganaBuffer`. nil = end (legacy behavior).
     var bufferCursorPosition: Int? = nil
@@ -95,6 +99,7 @@ final class LingoKeyboardState {
         showNumberKeyboard = false
         showEmojiPicker = false
         useRomajiInput = false
+        flickSubKeyboard = .kana
         bufferCursorPosition = nil
         isTrackpadActive = false
         hangulComposer.reset()
@@ -140,7 +145,34 @@ final class LingoKeyboardState {
 
     func switchToFlickInput() {
         useRomajiInput = false
+        flickSubKeyboard = .kana
         romajiConverter.reset()
+    }
+
+    // MARK: - Flick Sub-Keyboard Switching
+
+    func switchToEnglishFlick() {
+        flickSubKeyboard = .english
+    }
+
+    func switchToNumberFlick() {
+        flickSubKeyboard = .number
+    }
+
+    func switchToKanaFlick() {
+        flickSubKeyboard = .kana
+    }
+
+    func handleFlickDirectChar(_ char: String) {
+        guard let proxy = controller?.textDocumentProxy else { return }
+        // Handle punctuation cycling backspace prefix
+        if char.hasPrefix("\u{0008}") {
+            let replacement = String(char.dropFirst())
+            proxy.deleteBackward()
+            proxy.insertText(replacement)
+        } else {
+            proxy.insertText(char)
+        }
     }
 
     // MARK: - Character Input

@@ -5,9 +5,19 @@ struct HiraganaPreviewView: View {
     let composingText: String
     var cursorPosition: Int? = nil
     var isTrackpadActive: Bool = false
+    var onCursorMove: ((LingoKeyboardState.CursorDirection) -> Void)? = nil
+    var onTrackpadActivated: (() -> Void)? = nil
+    var onTrackpadDeactivated: (() -> Void)? = nil
 
     @State private var cursorVisible: Bool = true
     @State private var blinkTimer: Timer?
+    @State private var longPressTimer: Timer?
+    @State private var isLongPressing = false
+    @State private var trackpadAnchorX: CGFloat = 0
+    @State private var accumulatedOffset: CGFloat = 0
+
+    private let longPressThreshold: TimeInterval = 0.4
+    private let cursorStepPt: CGFloat = 12
 
     var body: some View {
         HStack(spacing: 0) {
@@ -24,6 +34,42 @@ struct HiraganaPreviewView: View {
         .cornerRadius(8)
         .padding(.horizontal, 8)
         .padding(.vertical, 2)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    if !isLongPressing && longPressTimer == nil {
+                        trackpadAnchorX = value.location.x
+                        accumulatedOffset = 0
+                        longPressTimer = Timer.scheduledTimer(withTimeInterval: longPressThreshold, repeats: false) { _ in
+                            DispatchQueue.main.async {
+                                isLongPressing = true
+                                onTrackpadActivated?()
+                            }
+                        }
+                    } else if isLongPressing {
+                        let dx = value.location.x - trackpadAnchorX
+                        let totalSteps = Int(dx / cursorStepPt)
+                        let previousSteps = Int(accumulatedOffset / cursorStepPt)
+                        let delta = totalSteps - previousSteps
+                        if delta != 0 {
+                            let direction: LingoKeyboardState.CursorDirection = delta > 0 ? .right : .left
+                            for _ in 0..<abs(delta) {
+                                onCursorMove?(direction)
+                            }
+                            accumulatedOffset = dx
+                        }
+                    }
+                }
+                .onEnded { _ in
+                    if isLongPressing {
+                        isLongPressing = false
+                        onTrackpadDeactivated?()
+                    }
+                    longPressTimer?.invalidate()
+                    longPressTimer = nil
+                    accumulatedOffset = 0
+                }
+        )
         .onChange(of: isTrackpadActive) { _, active in
             if active { startBlinking() } else { stopBlinking() }
         }
