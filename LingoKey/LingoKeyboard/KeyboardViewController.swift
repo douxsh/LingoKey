@@ -164,14 +164,35 @@ final class LingoKeyboardState {
     }
 
     func handleFlickDirectChar(_ char: String) {
-        guard let proxy = controller?.textDocumentProxy else { return }
-        // Handle punctuation cycling backspace prefix
-        if char.hasPrefix("\u{0008}") {
-            let replacement = String(char.dropFirst())
-            proxy.deleteBackward()
-            proxy.insertText(replacement)
+        if currentMode.isJapaneseInput {
+            // In Japanese mode, route through the buffer so it stays in the preview
+            if char.hasPrefix("\u{0008}") {
+                let replacement = String(char.dropFirst())
+                if !hiraganaBuffer.isEmpty {
+                    if bufferCursorPosition != nil {
+                        deleteFromBuffer()
+                        insertIntoBuffer(replacement)
+                    } else {
+                        hiraganaBuffer.removeLast()
+                        hiraganaBuffer += replacement
+                    }
+                } else {
+                    controller?.textDocumentProxy.deleteBackward()
+                    controller?.textDocumentProxy.insertText(replacement)
+                }
+            } else {
+                insertIntoBuffer(char)
+            }
+            suggestionManager.hiraganaBufferDidChange(buffer: hiraganaBuffer)
         } else {
-            proxy.insertText(char)
+            guard let proxy = controller?.textDocumentProxy else { return }
+            if char.hasPrefix("\u{0008}") {
+                let replacement = String(char.dropFirst())
+                proxy.deleteBackward()
+                proxy.insertText(replacement)
+            } else {
+                proxy.insertText(char)
+            }
         }
     }
 
