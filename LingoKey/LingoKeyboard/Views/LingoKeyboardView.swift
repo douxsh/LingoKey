@@ -76,7 +76,6 @@ struct LingoKeyboardView: View {
                 onSwitchToRomaji: { lingoState.switchToRomajiInput() },
                 onAdvanceCursor: { lingoState.handleAdvanceCursor() },
                 onUndoKana: { lingoState.handleUndoKana() },
-                onToggleNumberKeyboard: { lingoState.toggleNumberKeyboard() },
                 onToggleEmojiPicker: { lingoState.toggleEmojiPicker() },
                 isComposing: !lingoState.hiraganaBuffer.isEmpty,
                 onCursorMove: { lingoState.moveBufferCursor(direction: $0) },
